@@ -5,7 +5,7 @@ import schema from './graphql/schema';
 async function startApolloServer() {
   const PORT = 8080;
   const app: Application = express();
-  const server: ApolloServer = new ApolloServer({schema});
+  const server: ApolloServer = new ApolloServer({schema, mocks: true});
   await server.start();
   server.applyMiddleware({
     app,
