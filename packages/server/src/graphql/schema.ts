@@ -1,6 +1,6 @@
 import fs from 'fs'; 
 import { GraphQLSchema } from 'graphql'; 
-import { makeExecutableSchema } from 'graphql-tools'; 
+import { makeExecutableSchema } from '@graphql-tools/schema'; 
 import { gql } from 'apollo-server-express'; 
 import resolvers from './resolvers'; 
 
