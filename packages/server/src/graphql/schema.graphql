@@ -15,7 +15,7 @@ type Post {
   id: ID!
   text: String
   image: String
-  author: User!
+  author: ID!
   commentsCount: Int!
   likesCount: Int!
   likedByAuthUser: Boolean
@@ -27,14 +27,14 @@ type Post {
 type Comment {
   id: ID!
   comment: String!
-  author: User!
+  author: ID!
   post: ID!
   createdAt: String!
 }
 
 type Like {
   id: ID!
-  user: User!
+  user: ID!
   post: ID!
   createdAt: String!
 }
