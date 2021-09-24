@@ -15,6 +15,7 @@
     "@graphql-tools/utils": "^8.2.3",
     "apollo-server-express": "^3.3.0",
     "casual": "^1.6.2",
+    "cors": "^2.8.5",
     "express": "^4.17.1",
     "graphql": "^15.6.0"
   },
