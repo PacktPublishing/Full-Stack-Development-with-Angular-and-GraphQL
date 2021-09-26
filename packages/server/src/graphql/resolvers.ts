@@ -5,4 +5,4 @@ const resolvers: IResolvers = {
     message: () => 'It works!' 
   } 
 }; 
-export default resolvers; 
+export default resolvers;
