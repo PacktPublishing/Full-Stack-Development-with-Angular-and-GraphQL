@@ -51,7 +51,7 @@ type Query {
   getUser(userId: ID!): User 
   getPostsByUserId(userId: ID!, offset: Int, limit: Int): [Post]    
   getFeed(offset: Int, limit: Int): [Post]
-  getNotificationsByUserId(userId: ID! skip: Int, limit: Int): [Notification]
+  getNotificationsByUserId(userId: ID!, offset: Int, limit: Int): [Notification]
   getCommentsByPostId(postId: ID!, offset: Int, limit: Int): [Comment]
   getLikesByPostId(postId: ID!, offset: Int, limit: Int): [Like]
   searchUsers(searchQuery: String): [User]

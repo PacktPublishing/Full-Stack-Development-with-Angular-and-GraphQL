@@ -135,7 +135,7 @@ export type QueryGetLikesByPostIdArgs = {
 
 export type QueryGetNotificationsByUserIdArgs = {
   limit?: Maybe<Scalars['Int']>;
-  skip?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
   userId: Scalars['ID'];
 };
 
