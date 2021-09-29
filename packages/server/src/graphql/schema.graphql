@@ -46,6 +46,11 @@ type Notification {
   createdAt: String!
 }
 
+type AuthPayload { 
+    token: String! 
+    user: User! 
+} 
+
 type Query {
   message: String!
   getUser(userId: ID!): User 
@@ -65,4 +70,6 @@ type Mutation {
   like(postId: ID!): Like
   removeLike(postId: ID!): Like
   removeNotification(id: ID!): ID
+  register(fullName: String!, username: String!, email: String!, password: String!): AuthPayload!
+  signIn(email: String!, password: String!): AuthPayload!
 }
