@@ -42,7 +42,7 @@ type Like {
 type Notification {
   id: ID!
   text: String!
-  post: ID!
+  postId: ID!
   createdAt: String!
 }
 
