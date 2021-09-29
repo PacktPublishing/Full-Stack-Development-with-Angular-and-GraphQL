@@ -1,3 +1,5 @@
+scalar Upload 
+
 type User {
   id: ID!
   fullName: String!
@@ -46,23 +48,41 @@ type Notification {
   createdAt: String!
 }
 
+type AuthPayload { 
+    token: String! 
+    user: User! 
+} 
+
+type File {
+  url: String
+  filename: String
+  mimetype: String
+  encoding: String
+}
+
 type Query {
   message: String!
   getUser(userId: ID!): User 
-  getPostsByUserId(userId: ID!, offset: Int, limit: Int): [Post]    
-  getFeed(offset: Int, limit: Int): [Post]
-  getNotificationsByUserId(userId: ID!, offset: Int, limit: Int): [Notification]
-  getCommentsByPostId(postId: ID!, offset: Int, limit: Int): [Comment]
-  getLikesByPostId(postId: ID!, offset: Int, limit: Int): [Like]
-  searchUsers(searchQuery: String): [User]
+  getPostsByUserId(userId: ID!, offset: Int, limit: Int): [Post] @auth    
+  getFeed(offset: Int, limit: Int): [Post] @auth
+  getNotificationsByUserId(userId: ID!, offset: Int, limit: Int): [Notification] @auth
+  getCommentsByPostId(postId: ID!, offset: Int, limit: Int): [Comment] @auth
+  getLikesByPostId(postId: ID!, offset: Int, limit: Int): [Like] @auth
+  searchUsers(searchQuery: String): [User] @auth
 } 
 
 type Mutation {
-  post(text: String, image: String): Post
-  removePost(id: ID!): ID 
-  comment(comment: String!, postId: ID!): Comment
-  removeComment(id: ID!): Comment
-  like(postId: ID!): Like
-  removeLike(postId: ID!): Like
-  removeNotification(id: ID!): ID
+  post(text: String, image: String): Post @auth
+  removePost(id: ID!): ID @auth 
+  comment(comment: String!, postId: ID!): Comment @auth
+  removeComment(id: ID!): Comment @auth
+  like(postId: ID!): Like @auth
+  removeLike(postId: ID!): Like @auth
+  removeNotification(id: ID!): ID @auth
+  register(fullName: String!, username: String!, email: String!, password: String!): AuthPayload!
+  signIn(email: String!, password: String!): AuthPayload!
+  uploadFile(file: Upload!): File @auth
+  setUserPhoto(file: Upload!): User @auth
+  setUserCover(file: Upload!): User @auth
+  setUserBio(bio: String!): User @auth
 }
