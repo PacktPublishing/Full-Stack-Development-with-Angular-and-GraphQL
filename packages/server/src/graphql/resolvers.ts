@@ -2,7 +2,31 @@ import { Context } from '..';
 import { Resolvers, User, Post, Comment, Like, Notification } from '@ngsocial/graphql';
 import { ApolloError } from 'apollo-server-errors';
 import { Post as PostEntity } from "../entity";
-import { DeleteResult } from 'typeorm';
+import { DeleteResult, QueryFailedError } from 'typeorm';
+import jsonwebtoken from 'jsonwebtoken';
+import crypto from 'crypto';
+import dotenv from 'dotenv';
+dotenv.config();
+
+const hashPassword = async (plainPassword: string): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const salt = crypto.randomBytes(16).toString("hex");
+    crypto.scrypt(plainPassword, salt, 64, (err, derivedKey) => {
+      if (err) reject(err);
+      resolve(`${salt}:${derivedKey.toString('hex')}`);
+    });
+  })
+};
+const compareToHash = async (plainPassword: string, hash: string): Promise<boolean> => {
+  return new Promise((resolve, reject) => {
+    const [salt, key] = hash.split(":");
+    crypto.scrypt(plainPassword, salt, 64, (err, derivedKey) => {
+      if (err) reject(err);
+      resolve(key == derivedKey.toString('hex'));
+    });
+  })
+};
+
 
 
 const resolvers: Resolvers = {
@@ -88,10 +112,10 @@ const resolvers: Resolvers = {
     },
     removeLike: async (_, args, ctx: Context) => {
       throw new ApolloError("Not implemented yet", "NOT_IMPLEMENTED_YET");
-    },    
-    removePost: async (_, args, {orm}: Context) => {
+    },
+    removePost: async (_, args, { orm }: Context) => {
       const post = await orm.postRepository.findOne(args.id, { relations: ['author'] });
-      if(!post){
+      if (!post) {
         throw new ApolloError("Post not found", "POST_NOT_FOUND");
       }
       const result: DeleteResult = await orm.postRepository.createQueryBuilder()
@@ -100,37 +124,77 @@ const resolvers: Resolvers = {
       if (postsCount && postsCount >= 1) {
         await orm.userRepository.update({ id: post?.author.id }, { postsCount: postsCount - 1 });
       }
-      if(result.affected && result.affected <= 0) {
+      if (result.affected && result.affected <= 0) {
         throw new ApolloError("Post not deleted", "POST_NOT_DELETED");
       }
       return args.id;
     },
-    removeComment: async (_, args, {orm}: Context) => {
-      const comment = await orm.commentRepository.findOne(args.id, {relations:['author', 'post']});
-      if(!comment){
+    removeComment: async (_, args, { orm }: Context) => {
+      const comment = await orm.commentRepository.findOne(args.id, { relations: ['author', 'post'] });
+      if (!comment) {
         throw new ApolloError("Comment not found", "COMMENT_NOT_FOUND");
       }
       const result: DeleteResult = await orm.commentRepository.delete(args.id);
-      if(result.affected && result.affected <= 0) {
+      if (result.affected && result.affected <= 0) {
         throw new ApolloError("Comment not deleted", "COMMENT_NOT_DELETED");
       }
       const commentsCount = comment?.post?.commentsCount;
-      if(commentsCount && commentsCount >= 1){
+      if (commentsCount && commentsCount >= 1) {
         await orm.postRepository.update(comment.post.id, { commentsCount: commentsCount - 1 });
       }
       return comment as unknown as Comment;
     },
-    removeNotification: async (_, args, {orm}: Context) => {
+    removeNotification: async (_, args, { orm }: Context) => {
       const notificationRepository = orm.notificationRepository;
-      const notification = await notificationRepository.findOne(args.id, {relations:['user']});
-      if(!notification){
+      const notification = await notificationRepository.findOne(args.id, { relations: ['user'] });
+      if (!notification) {
         throw new ApolloError("Notification not found", "NOTIFICATION_NOT_FOUND");
       }
       const result: DeleteResult = await notificationRepository.delete(args.id);
-      if(result.affected && result.affected <= 0) {
+      if (result.affected && result.affected <= 0) {
         throw new ApolloError("Notification not deleted", "NOTIFICATION_NOT_DELETED");
       }
       return args.id;
+    },
+    register: async (_, args, { orm }) => {
+      const { fullName, username, email, password } = args;
+      let user = orm.userRepository.create({
+        fullName: fullName,
+        username: username,
+        email: email,
+        password: await hashPassword(password),
+        postsCount: 0,
+        image: 'https://i.imgur.com/nzTFnsM.png'
+      });
+      const savedUser = await orm.userRepository.save(user)
+        .catch((error: unknown) => {
+          if (error instanceof QueryFailedError && error.driverError.code == "ER_DUP_ENTRY") {
+            throw new ApolloError("A user with this email/username already exists", "USER_ALREADY_EXISTS");
+          }
+        });
+      console.log("saved user", savedUser.id);
+      const token = jsonwebtoken.sign(
+        { id: savedUser.id, email: user.email },
+        process.env.JWT_SECRET as string,
+        { expiresIn: '1y' }
+      );
+      return { token: token, user: savedUser };
+    },
+    signIn: async (_, args, { orm }) => {
+      const { email, password } = args;
+      const user = await orm.userRepository.findOne({ where: { email: email } });
+      if (!user) {
+        throw new ApolloError('No user found with this email!', 'NO_USER_FOUND');
+      }
+      if (!await compareToHash(password, user.password)) {
+        throw new ApolloError('Incorrect password!', 'INCORRECT_PASSWORD');
+      }
+      const token = jsonwebtoken.sign(
+        { id: user.id, email: user.email },
+        process.env.JWT_SECRET as string,
+        { expiresIn: '1d' }
+      );
+      return { token, user };
     }
   }
 };
