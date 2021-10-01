@@ -86,3 +86,8 @@ type Mutation {
   setUserCover(file: Upload!): User @auth
   setUserBio(bio: String!): User @auth
 }
+
+type Subscription { 
+  onPostCommented: Comment 
+  onPostLiked: Like 
+} 
