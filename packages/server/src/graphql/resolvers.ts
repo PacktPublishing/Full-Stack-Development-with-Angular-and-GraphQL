@@ -10,6 +10,14 @@ import jsonwebtoken from 'jsonwebtoken';
 import crypto from 'crypto';
 import dotenv from 'dotenv';
 dotenv.config();
+import { GraphQLUpload } from 'graphql-upload'; 
+import AWS from 'aws-sdk';
+const spacesEndpoint = new AWS.Endpoint(process.env.S3_ENDPOINT as string);
+const s3 = new AWS.S3({
+  endpoint: spacesEndpoint,
+  accessKeyId: process.env.S3_ACCESS_KEY_ID,
+  secretAccessKey: process.env.S3_SECRET_ACCESS_KEY
+});
 
 const hashPassword = async (plainPassword: string): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -32,6 +40,7 @@ const compareToHash = async (plainPassword: string, hash: string): Promise<boole
 
 
 const resolvers: Resolvers = {
+  Upload: GraphQLUpload,
   Query: {
     message: () => 'It works!',
     getUser: async (_, args, ctx: Context) => {
@@ -255,6 +264,15 @@ const resolvers: Resolvers = {
         { expiresIn: '1d' }
       );
       return { token, user };
+    },
+    uploadFile: async (_, { file }) => {
+      const { createReadStream, filename, mimetype, encoding } = await file;
+      const fileStream = createReadStream();
+      const uploadParams = { Bucket: process.env.S3_BUCKET as string, Key: filename, Body: fileStream, ACL: "public-read" };
+      const result = await s3.upload(uploadParams).promise();
+      console.log(result);
+      const url = result.Location;
+      return { url, filename, mimetype, encoding };
     }
   }
 };
