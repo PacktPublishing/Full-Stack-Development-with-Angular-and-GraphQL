@@ -5,6 +5,21 @@ import cors from 'cors';
 import 'reflect-metadata';
 import { createConnection, Connection, Repository, getRepository } from 'typeorm';
 import { User, Post, Comment, Like, Notification } from './entity';
+import jwt from 'jsonwebtoken'
+import dotenv from 'dotenv';
+dotenv.config();
+const { JWT_SECRET } = process.env;
+
+const getAuthUser = (token: string): User | null => {
+  try {
+    if (token) {
+      return jwt.verify(token, JWT_SECRET as string) as User;
+    }
+    return null;
+  } catch (error) {
+    return null;
+  }
+}
 
 export type Context = {
   orm: {
@@ -14,9 +29,8 @@ export type Context = {
     likeRepository: Repository<Like>;
     notificationRepository: Repository<Notification>;
   };
+  authUser: User | null;
 };
-
-
 
 const connection: Promise<Connection> = createConnection();
 
@@ -35,16 +49,22 @@ async function startApolloServer() {
   const likeRepository: Repository<Like> = getRepository(Like);
   const notificationRepository: Repository<Notification> = getRepository(Notification);
 
-  const context: Context = {
-    orm: {
-      userRepository: userRepository,
-      postRepository: postRepository,
-      commentRepository: commentRepository,
-      likeRepository: likeRepository,
-      notificationRepository: notificationRepository
-    }
-  };
-  const server: ApolloServer = new ApolloServer({ schema, context });
+
+  const server: ApolloServer = new ApolloServer({ schema, context: ({req}) => {
+    const token = req.get('Authorization') || '';
+    const authUser = getAuthUser(token.split(' ')[1]);
+    const ctx: Context = {
+      orm: {
+        userRepository: userRepository,
+        postRepository: postRepository,
+        commentRepository: commentRepository,
+        likeRepository: likeRepository,
+        notificationRepository: notificationRepository
+      },
+      authUser: authUser
+    };
+    return ctx;
+  }});
 
   await server.start();
   server.applyMiddleware({
