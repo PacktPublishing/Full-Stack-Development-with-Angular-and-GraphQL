@@ -1,7 +1,10 @@
 import { Context } from '..';
 import { Resolvers, User, Post, Comment, Like, Notification } from '@ngsocial/graphql';
 import { ApolloError } from 'apollo-server-errors';
-import { Post as PostEntity } from "../entity";
+import { 
+  Post as PostEntity, 
+  Comment as CommentEntity,
+  Like as LikeEntity } from '../entity'; 
 import { DeleteResult, QueryFailedError } from 'typeorm';
 import jsonwebtoken from 'jsonwebtoken';
 import crypto from 'crypto';
@@ -28,7 +31,6 @@ const compareToHash = async (plainPassword: string, hash: string): Promise<boole
 };
 
 
-
 const resolvers: Resolvers = {
   Query: {
     message: () => 'It works!',
@@ -51,6 +53,11 @@ const resolvers: Resolvers = {
         .leftJoinAndSelect("likes.user", "likes_user")
         .orderBy("post.createdAt", "DESC").skip(args.offset as number).take(args.limit as number)
         .getMany();
+      posts.forEach((post: PostEntity) => {
+        if (post.likes?.find((like: LikeEntity) => { return like.user.id == ctx.authUser?.id })) {
+          post.likedByAuthUser = true;
+        }
+      });
       return posts as unknown as Post[];
     },
     getFeed: async (_, args, ctx: Context) => {
@@ -63,6 +70,11 @@ const resolvers: Resolvers = {
         .leftJoinAndSelect("likes.user", "likes_user")
         .orderBy("post.createdAt", "DESC").skip(args.offset as number).take(args.limit as number)
         .getMany();
+      feed.forEach((post: PostEntity) => {
+        if (post.likes?.find((like: LikeEntity) => { return like.user.id == ctx.authUser?.id })) {
+          post.likedByAuthUser = true;
+        }
+      });
       return feed as unknown as Post[];
     },
     getNotificationsByUserId: async (_, args, ctx: Context) => {
@@ -101,17 +113,65 @@ const resolvers: Resolvers = {
     }
   },
   Mutation: {
-    post: (_, args, ctx: Context) => {
-      throw new ApolloError("Not implemented yet", "NOT_IMPLEMENTED_YET");
+    post: async (_, args, { orm, authUser }: Context) => {
+      const post = orm.postRepository.create(
+        {
+          text: args.text,
+          image: args.image,
+          author: await orm.userRepository.findOne(authUser?.id)
+        } as unknown as PostEntity
+      );
+      const savedPost = await orm.postRepository.save(post);
+      await orm.userRepository.update({ id: authUser?.id }, { postsCount: post.author.postsCount + 1 });
+      return savedPost as unknown as Post;
     },
-    comment: (_, args, ctx: Context) => {
-      throw new ApolloError("Not implemented yet", "NOT_IMPLEMENTED_YET");
+    comment: async (_, args, { orm, authUser }: Context) => {
+      const comment = orm.commentRepository.create({
+        comment: args.comment,
+        post: await orm.postRepository.findOne(args.postId),
+        author: await orm.userRepository.findOne(authUser?.id)
+      } as CommentEntity);
+
+      const savedComment = await orm.commentRepository.save(comment);
+      await orm.postRepository.update(args.postId, {
+        commentsCount: savedComment.post.commentsCount + 1,
+        latestComment: savedComment
+      });
+      savedComment.post = await orm.postRepository.findOne(args.postId) as PostEntity;
+      return savedComment as unknown as Comment;
     },
-    like: (_, args, ctx: Context) => {
-      throw new ApolloError("Not implemented yet", "NOT_IMPLEMENTED_YET");
+    like: async (_, args, { orm, authUser }: Context) => {
+      const like = orm.likeRepository.create({
+        user: await orm.userRepository.findOne(authUser?.id),
+        post: await orm.postRepository.findOne(args.postId)
+      } as LikeEntity);
+      const savedLike = await orm.likeRepository.save(like);
+      await orm.postRepository.update(args.postId, {
+        likesCount: savedLike.post.likesCount + 1
+      });
+
+      savedLike.post = await orm.postRepository.findOne(args.postId) as PostEntity;
+      return savedLike as unknown as Like;
     },
-    removeLike: async (_, args, ctx: Context) => {
-      throw new ApolloError("Not implemented yet", "NOT_IMPLEMENTED_YET");
+    removeLike: async (_, args, { orm, authUser }: Context) => {
+      const like = await orm.likeRepository.createQueryBuilder("like")
+        .innerJoinAndSelect("like.user", "user")
+        .innerJoinAndSelect("like.post", "post")
+        .where("post.id = :postId", { postId: args.postId })
+        .andWhere("user.id = :userId", { userId: authUser?.id })
+        .getOne();
+      if (like && like.id) {
+        const result: DeleteResult = await orm.likeRepository.delete(like.id);
+        if (result.affected && result.affected <= 0) {
+          throw new ApolloError("Like not deleted", "LIKE_NOT_DELETED");
+        }
+      }
+      if (like && like.post && like.post.likesCount >= 1) {
+        await orm.postRepository.update(like.post.id, {
+          likesCount: like.post.likesCount - 1
+        });
+      }
+      return like as unknown as Like;
     },
     removePost: async (_, args, { orm }: Context) => {
       const post = await orm.postRepository.findOne(args.id, { relations: ['author'] });
