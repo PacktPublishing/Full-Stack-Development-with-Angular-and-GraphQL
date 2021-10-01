@@ -1,3 +1,5 @@
+scalar Upload 
+
 type User {
   id: ID!
   fullName: String!
@@ -51,6 +53,13 @@ type AuthPayload {
     user: User! 
 } 
 
+type File {
+  url: String
+  filename: String
+  mimetype: String
+  encoding: String
+}
+
 type Query {
   message: String!
   getUser(userId: ID!): User 
@@ -72,4 +81,5 @@ type Mutation {
   removeNotification(id: ID!): ID @auth
   register(fullName: String!, username: String!, email: String!, password: String!): AuthPayload!
   signIn(email: String!, password: String!): AuthPayload!
+  uploadFile(file: Upload!): File
 }
