@@ -9,6 +9,7 @@ import jwt from 'jsonwebtoken'
 import dotenv from 'dotenv';
 dotenv.config();
 const { JWT_SECRET } = process.env;
+import { graphqlUploadExpress } from 'graphql-upload';
 
 const getAuthUser = (token: string): User | null => {
   try {
@@ -43,6 +44,7 @@ async function startApolloServer() {
   const PORT = 8080;
   const app: Application = express();
   app.use(cors());
+  app.use(graphqlUploadExpress());
   const userRepository: Repository<User> = getRepository(User);
   const postRepository: Repository<Post> = getRepository(Post);
   const commentRepository: Repository<Comment> = getRepository(Comment);
