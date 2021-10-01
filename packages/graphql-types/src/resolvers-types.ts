@@ -211,6 +211,12 @@ export type QuerySearchUsersArgs = {
   searchQuery?: Maybe<Scalars['String']>;
 };
 
+export type Subscription = {
+  __typename?: 'Subscription';
+  onPostCommented?: Maybe<Comment>;
+  onPostLiked?: Maybe<Like>;
+};
+
 export type User = {
   __typename?: 'User';
   bio?: Maybe<Scalars['String']>;
@@ -306,6 +312,7 @@ export type ResolversTypes = {
   Post: ResolverTypeWrapper<Post>;
   Query: ResolverTypeWrapper<{}>;
   String: ResolverTypeWrapper<Scalars['String']>;
+  Subscription: ResolverTypeWrapper<{}>;
   Upload: ResolverTypeWrapper<Scalars['Upload']>;
   User: ResolverTypeWrapper<User>;
 };
@@ -324,6 +331,7 @@ export type ResolversParentTypes = {
   Post: Post;
   Query: {};
   String: Scalars['String'];
+  Subscription: {};
   Upload: Scalars['Upload'];
   User: User;
 };
@@ -408,6 +416,11 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   searchUsers?: Resolver<Maybe<Array<Maybe<ResolversTypes['User']>>>, ParentType, ContextType, RequireFields<QuerySearchUsersArgs, never>>;
 };
 
+export type SubscriptionResolvers<ContextType = any, ParentType extends ResolversParentTypes['Subscription'] = ResolversParentTypes['Subscription']> = {
+  onPostCommented?: SubscriptionResolver<Maybe<ResolversTypes['Comment']>, "onPostCommented", ParentType, ContextType>;
+  onPostLiked?: SubscriptionResolver<Maybe<ResolversTypes['Like']>, "onPostLiked", ParentType, ContextType>;
+};
+
 export interface UploadScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Upload'], any> {
   name: 'Upload';
 }
@@ -435,6 +448,7 @@ export type Resolvers<ContextType = any> = {
   Notification?: NotificationResolvers<ContextType>;
   Post?: PostResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
+  Subscription?: SubscriptionResolvers<ContextType>;
   Upload?: GraphQLScalarType;
   User?: UserResolvers<ContextType>;
 };

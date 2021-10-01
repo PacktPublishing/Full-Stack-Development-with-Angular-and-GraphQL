@@ -1,5 +1,5 @@
 import express, { Application } from 'express';
-import { ApolloServer } from 'apollo-server-express';
+import { ApolloServer, AuthenticationError } from 'apollo-server-express';
 import schema from './graphql/schema';
 import cors from 'cors';
 import 'reflect-metadata';
@@ -10,6 +10,9 @@ import dotenv from 'dotenv';
 dotenv.config();
 const { JWT_SECRET } = process.env;
 import { graphqlUploadExpress } from 'graphql-upload';
+import { createServer } from 'http'; 
+import { execute, subscribe } from 'graphql'; 
+import { SubscriptionServer, ConnectionParams } from 'subscriptions-transport-ws';
 
 const getAuthUser = (token: string): User | null => {
   try {
@@ -50,7 +53,7 @@ async function startApolloServer() {
   const commentRepository: Repository<Comment> = getRepository(Comment);
   const likeRepository: Repository<Like> = getRepository(Like);
   const notificationRepository: Repository<Notification> = getRepository(Notification);
-
+  const httpServer = createServer(app);
 
   const server: ApolloServer = new ApolloServer({ schema, context: ({req}) => {
     const token = req.get('Authorization') || '';
@@ -66,18 +69,40 @@ async function startApolloServer() {
       authUser: authUser
     };
     return ctx;
-  }});
-
+  }, plugins: [
+    {
+      async serverWillStart() {
+        return {
+          async drainServer() {
+            subscriptionServer.close();
+          }
+        };
+      }
+    }
+  ]});
+  const subscriptionServer = SubscriptionServer.create(
+    { 
+      schema, execute, subscribe, onConnect: (connectionParams: ConnectionParams) => {
+        const token = connectionParams.get('authToken') || '';
+        if (token != '') {
+          const authUser = getAuthUser(token.split(' ')[1]);
+          return {
+            authUser: authUser
+          }
+        }
+        throw new AuthenticationError('User is not authenticated');
+      }
+    },
+    { server: httpServer, path: server.graphqlPath }
+  );
   await server.start();
   server.applyMiddleware({
     app,
     path: '/graphql'
   });
-  app.listen(PORT, () => {
+  httpServer.listen(PORT, () => {
     console.log(`Server is running at http://localhost:${PORT}`);
   });
 }
-
-
 
 
