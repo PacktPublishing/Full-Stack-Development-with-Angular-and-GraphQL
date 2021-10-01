@@ -18,6 +18,8 @@ const s3 = new AWS.S3({
   accessKeyId: process.env.S3_ACCESS_KEY_ID,
   secretAccessKey: process.env.S3_SECRET_ACCESS_KEY
 });
+import { PubSub } from 'graphql-subscriptions'; 
+const pubsub = new PubSub(); 
 
 const hashPassword = async (plainPassword: string): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -147,6 +149,7 @@ const resolvers: Resolvers = {
         latestComment: savedComment
       });
       savedComment.post = await orm.postRepository.findOne(args.postId) as PostEntity;
+      pubsub.publish('ON_POST_COMMENTED', { onPostCommented: savedComment }); 
       return savedComment as unknown as Comment;
     },
     like: async (_, args, { orm, authUser }: Context) => {
@@ -160,6 +163,7 @@ const resolvers: Resolvers = {
       });
 
       savedLike.post = await orm.postRepository.findOne(args.postId) as PostEntity;
+      pubsub.publish('ON_POST_LIKED', { onPostLiked: savedLike }); 
       return savedLike as unknown as Like;
     },
     removeLike: async (_, args, { orm, authUser }: Context) => {
@@ -333,6 +337,14 @@ const resolvers: Resolvers = {
         }     
       return await orm.userRepository.findOne(authUser?.id) as unknown as User;      
     }
-  }
+  },
+  Subscription: { 
+    onPostCommented: { 
+      subscribe: () => pubsub.asyncIterator(['ON_POST_COMMENTED']) 
+    }, 
+    onPostLiked: { 
+      subscribe: () => pubsub.asyncIterator(['ON_POST_LIKED']) 
+    } 
+  } 
 };
 export default resolvers;
