@@ -5,7 +5,7 @@ import {
   Post as PostEntity, 
   Comment as CommentEntity,
   Like as LikeEntity } from '../entity'; 
-import { DeleteResult, QueryFailedError } from 'typeorm';
+import { DeleteResult, QueryFailedError, UpdateResult } from 'typeorm';
 import jsonwebtoken from 'jsonwebtoken';
 import crypto from 'crypto';
 import dotenv from 'dotenv';
@@ -273,6 +273,56 @@ const resolvers: Resolvers = {
       console.log(result);
       const url = result.Location;
       return { url, filename, mimetype, encoding };
+    },
+    setUserPhoto: async (_, args, { orm, authUser }: Context) => {
+      const { createReadStream, filename } = await args.file;
+      const fileStream = createReadStream();
+      const uploadParams = {
+        Bucket: process.env.S3_BUCKET as string,
+        Key: filename, Body: fileStream,
+        ACL: "public-read"
+      };
+      let fileUrl = '';
+      try {
+        const uploadResult = await s3.upload(uploadParams).promise();
+        fileUrl = uploadResult.Location;
+      } catch (err) {
+        throw new ApolloError("Setting user photo failed", "SET_USER_PHOTO_FAILED");
+      }
+      if (fileUrl != '') {
+        const updateResult: UpdateResult = await orm.userRepository.update(
+          { id: authUser?.id },
+          { image: fileUrl });
+        if (updateResult.affected && updateResult.affected <= 0) {
+          throw new ApolloError("Setting user photo failed", "SET_USER_PHOTO_FAILED");
+        }
+      }
+      return await orm.userRepository.findOne(authUser?.id) as unknown as User;
+    },
+    setUserCover: async (_, args, { orm, authUser }: Context) => {
+      const { createReadStream, filename } = await args.file;
+      const fileStream = createReadStream();
+      const uploadParams = {
+        Bucket: process.env.S3_BUCKET as string,
+        Key: filename, Body: fileStream,
+        ACL: "public-read"
+      };
+      let fileUrl = '';
+      try {
+        const uploadResult = await s3.upload(uploadParams).promise();
+        fileUrl = uploadResult.Location;
+      } catch (err) {
+        throw new ApolloError("Setting user cover failed", "SET_USER_COVER_FAILED");
+      }
+      if (fileUrl != '') {
+        const updateResult: UpdateResult = await orm.userRepository.update(
+          { id: authUser?.id },
+          { coverImage: fileUrl });
+        if (updateResult.affected && updateResult.affected <= 0) {
+          throw new ApolloError("Setting user cover failed", "SET_USER_COVER_FAILED");
+        }
+      }
+      return await orm.userRepository.findOne(authUser?.id) as unknown as User;
     }
   }
 };

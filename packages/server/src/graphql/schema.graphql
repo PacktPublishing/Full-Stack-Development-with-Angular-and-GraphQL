@@ -81,5 +81,7 @@ type Mutation {
   removeNotification(id: ID!): ID @auth
   register(fullName: String!, username: String!, email: String!, password: String!): AuthPayload!
   signIn(email: String!, password: String!): AuthPayload!
-  uploadFile(file: Upload!): File
+  uploadFile(file: Upload!): File @auth
+  setUserPhoto(file: Upload!): User @auth
+  setUserCover(file: Upload!): User @auth
 }
