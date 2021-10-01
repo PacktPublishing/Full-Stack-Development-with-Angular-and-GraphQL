@@ -84,4 +84,5 @@ type Mutation {
   uploadFile(file: Upload!): File @auth
   setUserPhoto(file: Upload!): User @auth
   setUserCover(file: Upload!): User @auth
+  setUserBio(bio: String!): User @auth
 }

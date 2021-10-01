@@ -323,6 +323,15 @@ const resolvers: Resolvers = {
         }
       }
       return await orm.userRepository.findOne(authUser?.id) as unknown as User;
+    },
+    setUserBio: async (_, args, { orm, authUser }: Context) => {
+      const updateResult: UpdateResult = await orm.userRepository.update(
+        { id: authUser?.id }, 
+        { bio: args.bio }); 
+        if(updateResult.affected && updateResult.affected == 0){
+          throw new ApolloError("User bio update failed", "USER_BIO_UPDATE_FAILED");
+        }     
+      return await orm.userRepository.findOne(authUser?.id) as unknown as User;      
     }
   }
 };
