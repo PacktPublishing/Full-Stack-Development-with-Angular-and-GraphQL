@@ -1,5 +1,5 @@
 import express, { Application } from 'express';
-import { ApolloServer } from 'apollo-server-express';
+import { ApolloServer, AuthenticationError } from 'apollo-server-express';
 import schema from './graphql/schema';
 import cors from 'cors';
 import 'reflect-metadata';
@@ -12,7 +12,7 @@ const { JWT_SECRET } = process.env;
 import { graphqlUploadExpress } from 'graphql-upload';
 import { createServer } from 'http'; 
 import { execute, subscribe } from 'graphql'; 
-import { SubscriptionServer } from 'subscriptions-transport-ws';
+import { SubscriptionServer, ConnectionParams } from 'subscriptions-transport-ws';
 
 const getAuthUser = (token: string): User | null => {
   try {
@@ -81,7 +81,18 @@ async function startApolloServer() {
     }
   ]});
   const subscriptionServer = SubscriptionServer.create(
-    { schema, execute, subscribe },
+    { 
+      schema, execute, subscribe, onConnect: (connectionParams: ConnectionParams) => {
+        const token = connectionParams.get('authToken') || '';
+        if (token != '') {
+          const authUser = getAuthUser(token.split(' ')[1]);
+          return {
+            authUser: authUser
+          }
+        }
+        throw new AuthenticationError('User is not authenticated');
+      }
+    },
     { server: httpServer, path: server.graphqlPath }
   );
   await server.start();
@@ -89,13 +100,9 @@ async function startApolloServer() {
     app,
     path: '/graphql'
   });
-  // 3
   httpServer.listen(PORT, () => {
     console.log(`Server is running at http://localhost:${PORT}`);
   });
 }
-
-
-
 
 

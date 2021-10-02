@@ -88,6 +88,6 @@ type Mutation {
 }
 
 type Subscription { 
-  onPostCommented: Comment 
-  onPostLiked: Like 
-} 
+  onPostCommented: Comment
+  onPostLiked: Like
+}
