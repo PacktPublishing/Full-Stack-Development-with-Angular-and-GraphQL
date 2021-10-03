@@ -11,5 +11,8 @@ export class HeaderComponent implements OnInit {
 
   ngOnInit(): void {
   }
+  invokeMe() {
+    console.log("Invoked from the console");
+  }
 
 }
