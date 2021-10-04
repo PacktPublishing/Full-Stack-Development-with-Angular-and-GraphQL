@@ -150,7 +150,7 @@ export class AuthService {
         offset: offset,
         limit: limit
       },
-      fetchPolicy: 'network-only',
+      fetchPolicy: 'cache-first',
     });
 
     const fetchMore: (users: User[]) => void = (users: User[]) => {
