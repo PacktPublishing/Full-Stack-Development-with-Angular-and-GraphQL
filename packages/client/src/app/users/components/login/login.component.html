@@ -1,1 +1,26 @@
-<p>login works!</p>
+<mat-card>
+  <mat-card-title>Log in to ngSocial</mat-card-title>
+  <mat-card-content>
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <mat-form-field>
+        <mat-icon matPrefix>mail</mat-icon>
+        <input autofocus type="email" matInput placeholder="Email" formControlName="email">
+      </mat-form-field>
+      <mat-form-field>
+        <mat-icon matPrefix>lock</mat-icon>
+        <input type="password" matInput placeholder="Password" formControlName="password">
+        <mat-hint align="start">
+          Password should be at least six characters
+        </mat-hint>
+      </mat-form-field>
+
+      <p *ngIf="errorMessage" class="error">
+        {{ errorMessage }}
+      </p>
+
+      <span> If you don't have an account, please <a routerLink="/users/signup">register</a> first.
+      </span>
+      <button type="submit" mat-raised-button color="primary">Log In</button>
+    </form>
+  </mat-card-content>
+</mat-card>
