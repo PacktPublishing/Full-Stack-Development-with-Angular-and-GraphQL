@@ -1,1 +1,23 @@
-<p>search-dialog works!</p>
+<h2 mat-dialog-title>Users</h2>
+<mat-dialog-content>
+  <mat-card *ngFor="let user of users;">
+    <mat-card-header>
+
+      <img mat-card-avatar [src]="user.image?? ''" />
+      <mat-card-title>
+        {{ user.fullName }}
+      </mat-card-title>
+
+      <mat-card-subtitle>
+        {{ user.username }}
+        <button (click)="goToProfile(user.id)" mat-button>Visit</button>
+      </mat-card-subtitle>
+
+    </mat-card-header>
+  </mat-card>
+</mat-dialog-content>
+
+<mat-dialog-actions>
+  <button class="mat-raised-button" (click)="close()">Close</button>
+  <button class="mat-raised-button" (click)="invokeFetchMore()">More..</button>
+</mat-dialog-actions>
