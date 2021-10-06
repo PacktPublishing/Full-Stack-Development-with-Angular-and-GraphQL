@@ -1,4 +1,4 @@
-import { Component, OnInit, ElementRef, ViewChild, OnDestroy } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { User, SearchUsersResponse, UsersResponse, AuthState } from 'src/app/shared';
@@ -11,7 +11,8 @@ import { Subject } from 'rxjs';
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
-  styleUrls: ['./header.component.css']
+  styleUrls: ['./header.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HeaderComponent implements OnInit, OnDestroy {
   @ViewChild('searchInput') searchInput: ElementRef | null = null;
@@ -22,7 +23,9 @@ export class HeaderComponent implements OnInit, OnDestroy {
   constructor(
     public authService: AuthService,
     public matDialog: MatDialog,
-    private router: Router, private snackBar: MatSnackBar) { }
+    private router: Router, 
+    private snackBar: MatSnackBar, 
+    private changeDetectorRef: ChangeDetectorRef) { }
 
   ngOnInit(): void {
     this.authService.authState
@@ -31,6 +34,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
       next: (authState: AuthState) => {
         this.isLoggedIn = authState.isLoggedIn;
         this.authUser = authState.currentUser;
+        this.changeDetectorRef.markForCheck();
       }
     });
   }
