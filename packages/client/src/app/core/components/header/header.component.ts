@@ -1,26 +1,42 @@
-import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import { User, SearchUsersResponse, UsersResponse } from 'src/app/shared';
+import { User, SearchUsersResponse, UsersResponse, AuthState } from 'src/app/shared';
 import { AuthService } from 'src/app/core';
 import { SearchDialogComponent } from '../search-dialog/search-dialog.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { first } from 'rxjs/operators';
+import { first, takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.css']
 })
-export class HeaderComponent implements OnInit {
+export class HeaderComponent implements OnInit, OnDestroy {
   @ViewChild('searchInput') searchInput: ElementRef | null = null;
   fetchMore: (users: User[]) => void = (users: User[]) => { };
+  public isLoggedIn: boolean = false;
+  public authUser: User | null = null;
+  private destroyNotifier$: Subject<boolean> = new Subject<boolean>();
   constructor(
     public authService: AuthService,
     public matDialog: MatDialog,
     private router: Router, private snackBar: MatSnackBar) { }
 
   ngOnInit(): void {
+    this.authService.authState
+    .pipe(takeUntil(this.destroyNotifier$))
+    .subscribe({
+      next: (authState: AuthState) => {
+        this.isLoggedIn = authState.isLoggedIn;
+        this.authUser = authState.currentUser;
+      }
+    });
+  }
+  ngOnDestroy(): void {
+    this.destroyNotifier$.next(true);
+    this.destroyNotifier$.complete();
   }
   logOut(): void {
     this.authService.logOut();
@@ -56,6 +72,5 @@ export class HeaderComponent implements OnInit {
     });
 
   }
-
 }
 
