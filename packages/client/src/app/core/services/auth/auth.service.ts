@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Apollo } from 'apollo-angular';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import {
   User,
@@ -17,14 +17,13 @@ import {
 import { GetUserGQL } from './graphql/getuser.service';
 import { LoginGQL } from './graphql/login.service';
 import { RegisterGQL } from './graphql/register.service';
+import { ApolloQueryResult } from '@apollo/client/core';
+import { authState, GET_AUTH_STATE } from 'src/app/reactive';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  authState: Observable<AuthState>;
-  isLoggedInAsync: Observable<boolean>;
-  private readonly authSubject: BehaviorSubject<AuthState>;
   constructor(
     private apollo: Apollo,
     private registerGQL: RegisterGQL,
@@ -36,19 +35,26 @@ export class AuthService {
     if (localToken) {
       isLoggedIn = this.tokenExists() && !this.tokenExpired(localToken);
     }
-    this.authSubject = new BehaviorSubject<AuthState>({
+    authState({
       isLoggedIn: isLoggedIn,
       currentUser: this.getLocalUser(),
       accessToken: localToken
     });
-    this.authState = this.authSubject.asObservable();
-    this.isLoggedInAsync = this.authState.pipe(map(state => state.isLoggedIn));
   }
-  get isLoggedIn(): boolean {
-    return this.authSubject.getValue().isLoggedIn;
+  get isLoggedIn(): Observable<boolean> {
+    return this.apollo.watchQuery<{ authState: AuthState }>({
+      query: GET_AUTH_STATE
+    }).valueChanges.pipe(map((qr: ApolloQueryResult<{ authState: AuthState }>) => qr.data.authState.isLoggedIn));
   }
-  get authUser(): User | null {
-    return this.authSubject.getValue().currentUser;
+  get authUser(): Observable<User | null> {
+    return this.apollo.watchQuery<{ authState: AuthState }>({
+      query: GET_AUTH_STATE
+    }).valueChanges.pipe(map((qr: ApolloQueryResult<{ authState: AuthState }>) => qr.data.authState.currentUser));
+  }    
+  get authState(): Observable<AuthState> {
+    return this.apollo.watchQuery<{ authState: AuthState }>({
+      query: GET_AUTH_STATE
+    }).valueChanges.pipe(map((qr: ApolloQueryResult<{ authState: AuthState }>) => qr.data.authState));
   }
   getLocalToken(): string | null {
     return localStorage.getItem(ACCESS_TOKEN);
@@ -72,14 +78,14 @@ export class AuthService {
   private updateAuthState(token: string, user: User) {
     this.storeToken(token);
     this.storeUser(user);
-    this.authSubject.next({
+    authState({
       isLoggedIn: true,
       currentUser: user,
       accessToken: token
     });
   }
   private resetAuthState() {
-    this.authSubject.next({
+    authState({
       isLoggedIn: false,
       currentUser: null,
       accessToken: null
