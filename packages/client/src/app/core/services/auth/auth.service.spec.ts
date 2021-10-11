@@ -14,7 +14,11 @@ import {
   LOGIN_MUTATION,
   RegisterResponse,
   REGISTER_MUTATION,
-  User
+  SEARCH_USERS_QUERY,
+  User,
+  UserResponse,
+  UsersResponse,
+  USER_QUERY
 } from 'src/app/shared';
 import { authState, GET_AUTH_STATE } from 'src/app/reactive';
 import { Apollo, QueryRef } from 'apollo-angular';
@@ -234,6 +238,58 @@ describe('AuthService', () => {
       expect(authState).toEqual(fakeAuthState);
       done();
     })
+  });
+  it('should log out users', () => {
+    spyOn(localStorage, 'removeItem');
+    const resetAuthStateSpy = spyOn(service, 'resetAuthState' as never);
+    service.logOut();
+    expect(localStorage.removeItem).toHaveBeenCalledWith(ACCESS_TOKEN);
+    expect(localStorage.removeItem).toHaveBeenCalledWith(AUTH_USER);
+    expect(resetAuthStateSpy).toHaveBeenCalled();
+  });
+  it('should search for users', (done) => {
+    const fakeSearchResponse = {
+      searchUsers: [
+        {
+          id: 'id#1',
+          fullName: 'Ahmed Bouchefra',
+          username: "ahmed.bouchefra"
+        }
+      ]
+    } as UsersResponse;
+    const searchUsersResponse = service.searchUsers('a b', 0, 2);
+    searchUsersResponse.data.subscribe({
+      next: (result) => {
+        expect(result)
+          .toEqual(fakeSearchResponse);
+        expect(result.searchUsers.length)
+          .toEqual(fakeSearchResponse.searchUsers.length);
+        done();
+      }
+    });
+    const op = controller.expectOne(SEARCH_USERS_QUERY);
+    expect(op.operation.variables.searchQuery).toEqual('a b');
+    expect(op.operation.variables.offset).toEqual(0);
+    expect(op.operation.variables.limit).toEqual(2);
+    op.flush({ data: fakeSearchResponse });
+  });
+  it('should get user by ID', (done) => {
+    const fakeUserResponse = {
+      getUser: {
+        id: 'id#0',
+        fullName: 'Ahmed Bouchefra'
+      }
+    } as UserResponse;
+    service.getUser('id#0').subscribe({
+      next: (result) => {
+        expect(result)
+          .toEqual(fakeUserResponse);
+        done();
+      }
+    });
+    const op = controller.expectOne(USER_QUERY);
+    expect(op.operation.variables.userId).toEqual('id#0');
+    op.flush({ data: fakeUserResponse });
   });
 });
 
