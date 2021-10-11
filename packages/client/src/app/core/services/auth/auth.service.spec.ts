@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+
 import { AuthService } from './auth.service';
 import {
   ApolloTestingController,
@@ -10,6 +11,7 @@ import {
   REGISTER_MUTATION,
   User
 } from 'src/app/shared';
+import { authState } from 'src/app/reactive';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -68,6 +70,26 @@ describe('AuthService', () => {
     expect(op.operation.variables.password).toEqual('1..9');
     // Mock the response data
     op.flush({ data: fakeRegisterResponse });
+  });
+  it('should reset auth state when registration fails on server', (done) => {
+    const initialState = {
+      isLoggedIn: false,
+      currentUser: null,
+      accessToken: null
+    };
+    const resetAuthStateSpy = spyOn(service, 'resetAuthState' as never);
+    service.register('A B', 'a.b', 'a.b@techiediaries.com', '1..9').subscribe({
+      error: () => {
+        expect(authState()).toEqual(initialState);
+        expect(resetAuthStateSpy).toHaveBeenCalled();
+        done();
+      }
+    })
+    const op = controller.expectOne((operation) => {
+      expect(operation.query.definitions).toEqual(REGISTER_MUTATION.definitions);
+      return true;
+    });
+    op.networkError({} as Error);
   });
 });
 
