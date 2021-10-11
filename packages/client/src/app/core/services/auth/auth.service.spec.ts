@@ -15,11 +15,14 @@ import {
   REGISTER_MUTATION,
   User
 } from 'src/app/shared';
-import { authState } from 'src/app/reactive';
+import { authState, GET_AUTH_STATE } from 'src/app/reactive';
+import { Apollo, QueryRef } from 'apollo-angular';
+import { of } from 'rxjs';
 
 describe('AuthService', () => {
   let service: AuthService;
   let controller: ApolloTestingController;
+  let apollo: Apollo;
   const fakeUser: User = {
     id: 'id#1',
     fullName: 'A B',
@@ -38,6 +41,7 @@ describe('AuthService', () => {
     });
     service = TestBed.inject(AuthService);
     controller = TestBed.inject(ApolloTestingController);
+    apollo = TestBed.inject(Apollo);
   });
 
   afterEach(() => {
@@ -163,6 +167,25 @@ describe('AuthService', () => {
     spyOn(localStorage, 'setItem');
     (service as any).storeToken(fakeToken);
     expect(localStorage.setItem).toHaveBeenCalledWith(ACCESS_TOKEN, fakeToken);
+  });
+  it('should return the isLoggedIn state', (done) => {
+    spyOn(apollo, 'watchQuery').and.returnValue({
+      valueChanges: of(
+        {
+          data:
+          {
+            authState:
+            {
+              isLoggedIn: true
+            }
+          }
+        })
+    } as QueryRef<any, any>);
+    service.isLoggedIn.subscribe((isLoggedIn: boolean) => {
+      expect(apollo.watchQuery).toHaveBeenCalledOnceWith({ query: GET_AUTH_STATE });
+      expect(isLoggedIn).toEqual(true);
+      done();
+    });
   });
 });
 
