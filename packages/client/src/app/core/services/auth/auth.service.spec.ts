@@ -6,7 +6,11 @@ import {
   ApolloTestingModule
 } from 'apollo-angular/testing';
 import {
+  ACCESS_TOKEN,
   AuthResponse,
+  AUTH_USER,
+  LoginResponse,
+  LOGIN_MUTATION,
   RegisterResponse,
   REGISTER_MUTATION,
   User
@@ -90,6 +94,75 @@ describe('AuthService', () => {
       return true;
     });
     op.networkError({} as Error);
+  });
+  it('should authenticate a user', (done) => {
+    const fakeLoginResponse: LoginResponse = {
+      signIn: authResponse
+    };
+    spyOn(service, 'updateAuthState' as never);
+    service.login('a.b@techiediaries.com', '1..9').subscribe({
+      next: (result) => {
+        expect(result)
+          .toEqual(fakeLoginResponse);
+        expect(service['updateAuthState']).toHaveBeenCalledWith(
+          fakeLoginResponse.signIn.token,
+          fakeLoginResponse.signIn.user
+        );
+        done();
+      }
+    });
+    const op = controller.expectOne((operation) => {
+      expect(operation.query.definitions).toEqual(LOGIN_MUTATION.definitions);
+      return true;
+    });
+    expect(op.operation.variables.email).toEqual('a.b@techiediaries.com');
+    expect(op.operation.variables.password).toEqual('1..9');
+    op.flush({ data: fakeLoginResponse });
+
+  });
+  it('should reset auth state when login fails on server', (done) => {
+    const resetAuthStateSpy = spyOn(service, 'resetAuthState' as never);
+
+    service.login('a.b@techiediaries.com', '1..9').subscribe({
+      error: () => {
+        expect(authState()).toEqual({
+          isLoggedIn: false,
+          currentUser: null,
+          accessToken: null
+        });
+        expect(resetAuthStateSpy).toHaveBeenCalled();
+        done();
+      }
+    })
+    const op = controller.expectOne((operation) => {
+      expect(operation.query.definitions).toEqual(LOGIN_MUTATION.definitions);
+      return true;
+    });
+    op.networkError({} as Error);
+  });
+  it('should store user and token on updateAuthState call', () => {
+    spyOn(service, 'storeUser');
+    spyOn(service, 'storeToken' as never);
+
+    spyOn(service, 'resetAuthState' as never);
+    (service as any).updateAuthState(fakeToken, fakeUser);
+    expect(service.storeUser).toHaveBeenCalledOnceWith(fakeUser);
+    expect((service as any).storeToken).toHaveBeenCalledOnceWith(fakeToken);
+    expect(authState()).toEqual({
+      isLoggedIn: true,
+      accessToken: fakeToken,
+      currentUser: fakeUser
+    });
+  });
+  it('should call localStorage.setItem on storeUser call', ()=> {
+    spyOn(localStorage, 'setItem');
+    service.storeUser(fakeUser);
+    expect(localStorage.setItem).toHaveBeenCalledWith(AUTH_USER, JSON.stringify(fakeUser));
+  });
+  it('should call localStorage.setItem on storeToken call', ()=> {
+    spyOn(localStorage, 'setItem');
+    (service as any).storeToken(fakeToken);
+    expect(localStorage.setItem).toHaveBeenCalledWith(ACCESS_TOKEN, fakeToken);
   });
 });
 
