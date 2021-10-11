@@ -8,6 +8,7 @@ import {
 import {
   ACCESS_TOKEN,
   AuthResponse,
+  AuthState,
   AUTH_USER,
   LoginResponse,
   LOGIN_MUTATION,
@@ -34,6 +35,11 @@ describe('AuthService', () => {
     token: fakeToken,
     user: fakeUser
   };
+  const fakeAuthState: AuthState = {
+    isLoggedIn: true,
+    currentUser: fakeUser,
+    accessToken: fakeToken
+  } as AuthState;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -186,6 +192,48 @@ describe('AuthService', () => {
       expect(isLoggedIn).toEqual(true);
       done();
     });
+  });
+  it('should return the authenticated user state', (done) => {
+    spyOn(apollo, 'watchQuery').and.returnValue(
+      {
+        valueChanges: of(
+          {
+            data:
+            {
+              authState:
+                {
+                  currentUser: fakeUser
+                }
+            }
+          })
+      } as QueryRef<any, any>
+    );
+    service.authUser.subscribe((authUser) => {
+      expect(apollo.watchQuery).toHaveBeenCalledOnceWith({ query: GET_AUTH_STATE });
+      expect(authUser).toEqual(fakeUser);
+      done();
+    })
+  });
+  it('should return the full auth state', (done) => {
+    spyOn(apollo, 'watchQuery').and.returnValue(
+      {
+        valueChanges: of(
+          {
+            data:
+            {
+              authState:
+                {
+                  ...fakeAuthState
+                }
+            }
+          })
+      } as QueryRef<any, any>
+    );
+    service.authState.subscribe((authState) => {
+      expect(apollo.watchQuery).toHaveBeenCalledOnceWith({ query: GET_AUTH_STATE });
+      expect(authState).toEqual(fakeAuthState);
+      done();
+    })
   });
 });
 
