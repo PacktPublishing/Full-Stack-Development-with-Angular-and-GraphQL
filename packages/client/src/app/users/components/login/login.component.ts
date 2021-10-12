@@ -4,7 +4,7 @@ import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from 'src/app/core';
-import { LoginResponse } from 'src/app/shared';
+import { LoginResponse, MaybeNullOrUndefined } from 'src/app/shared';
 
 @Component({
   selector: 'app-login',
@@ -43,7 +43,7 @@ export class LoginComponent implements OnInit {
       return;
     }
     this.loginSubscription = this.authService.login(email, password).subscribe({
-      next: (result: LoginResponse | null | undefined) => {
+      next: (result: MaybeNullOrUndefined<LoginResponse>) => {
         if (result) {
           const savedUserId = result.signIn.user?.id;
           this.snackBar.open('Login Success!', 'Ok', {

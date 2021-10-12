@@ -15,3 +15,4 @@ export type RegisterResponse = {
 export type LoginResponse = {
   signIn: AuthResponse;
 };
+export type MaybeNullOrUndefined<T> = T | null | undefined;

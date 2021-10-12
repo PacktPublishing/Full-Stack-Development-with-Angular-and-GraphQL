@@ -4,7 +4,7 @@ import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from 'src/app/core';
-import { RegisterResponse } from 'src/app/shared';
+import { MaybeNullOrUndefined, RegisterResponse } from 'src/app/shared';
 
 @Component({
   selector: 'app-signup',
@@ -47,7 +47,7 @@ export class SignupComponent implements OnInit, OnDestroy {
     }
 
     this.registerSubscription = this.authService.register(fullName, username, email, password).subscribe({
-      next: (result: RegisterResponse | null | undefined) => {
+      next: (result: MaybeNullOrUndefined<RegisterResponse>) => {
         const savedUserId = result?.register.user.id;
         this.snackBar.open('Signup Success!', 'Ok', {
           duration: 5 * 1000

@@ -12,7 +12,8 @@ import {
   SearchUsersResponse,
   SEARCH_USERS_QUERY,
   ACCESS_TOKEN,
-  AUTH_USER
+  AUTH_USER,
+  MaybeNullOrUndefined
 } from 'src/app/shared';
 import { GetUserGQL } from './graphql/getuser.service';
 import { LoginGQL } from './graphql/login.service';
@@ -95,7 +96,7 @@ export class AuthService {
     fullName: string,
     username: string,
     email: string,
-    password: string): Observable<RegisterResponse | null | undefined> {
+    password: string): Observable<MaybeNullOrUndefined<RegisterResponse>> {
     return this.registerGQL
       .mutate({
         fullName: fullName,
@@ -106,23 +107,19 @@ export class AuthService {
       .pipe(
         map(result => result.data),
         tap({
-          next: (data: RegisterResponse | null | undefined) => {
+          next: (data: MaybeNullOrUndefined<RegisterResponse>) => {
             if (data?.register.token && data?.register.user) {
 
               const token: string = data?.register.token, user: User = data?.register.user;
               this.updateAuthState(token, user);
             }
 
-          },
-          error: err => {
-            console.error(err);
-            this.resetAuthState();
           }
         }));
   }
   login(
     email: string,
-    password: string): Observable<LoginResponse | null | undefined> {
+    password: string): Observable<MaybeNullOrUndefined<LoginResponse>> {
     return this.loginGQL
       .mutate({
         email: email,
@@ -131,15 +128,11 @@ export class AuthService {
       .pipe(
         map(result => result.data),
         tap({
-          next: (data: LoginResponse | null | undefined) => {
+          next: (data: MaybeNullOrUndefined<LoginResponse>) => {
             if (data?.signIn.token && data?.signIn.user) {
               const token: string = data?.signIn.token, user = data?.signIn.user;
               this.updateAuthState(token, user);
             }
-          },
-          error: err => {
-            console.error(err);
-            this.resetAuthState();
           }
         }));
   }
