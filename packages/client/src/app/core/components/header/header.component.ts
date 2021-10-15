@@ -16,7 +16,6 @@ import { Subject } from 'rxjs';
 })
 export class HeaderComponent implements OnInit, OnDestroy {
   @ViewChild('searchInput') searchInput: ElementRef | null = null;
-  fetchMore: (users: User[]) => void = (users: User[]) => { };
   public isLoggedIn: boolean = false;
   public authUser: User | null = null;
   private destroyNotifier$: Subject<boolean> = new Subject<boolean>();
