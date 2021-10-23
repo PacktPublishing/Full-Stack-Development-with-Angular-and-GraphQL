@@ -1,3 +1,4 @@
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { AbstractControl } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -52,7 +53,8 @@ describe('SignupComponent', () => {
             }
           }
         }
-      ]
+      ],
+      schemas: [NO_ERRORS_SCHEMA]
     })
       .compileComponents();
     router = TestBed.inject(Router);
