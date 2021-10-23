@@ -22,4 +22,9 @@ describe('PageNotFoundComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+  it(`should display 'This page doesn't exist!'`, ()=> {
+    const pElement: HTMLElement = fixture.nativeElement.querySelector('p');
+    expect(pElement).toBeDefined();
+    expect(pElement.textContent).toContain(`This page doesn't exist!`);
+  });
 });
