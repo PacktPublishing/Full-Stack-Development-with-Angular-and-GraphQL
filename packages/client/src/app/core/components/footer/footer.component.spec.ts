@@ -22,4 +22,9 @@ describe('FooterComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+  it(`should display 'ngSocial (c) 2021'`, ()=> {
+    const pElement: HTMLElement = fixture.nativeElement.querySelector('p');
+    expect(pElement).toBeDefined();
+    expect(pElement.textContent).toContain(`ngSocial (c) 2021`);
+  });
 });
