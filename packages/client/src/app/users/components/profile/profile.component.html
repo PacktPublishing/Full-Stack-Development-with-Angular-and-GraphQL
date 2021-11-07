@@ -1,1 +1,73 @@
-<p>profile works!</p>
+<mat-card class="profile-cover-card">
+  <mat-card-content *ngIf="profileUser">
+    <div class="profile-cover" [ngStyle]="{'background-image': profileUser.coverImage }">
+    </div>
+    <img class="profile-image" src="{{ profileUser.image }}">
+  </mat-card-content>
+</mat-card>
+<mat-card class="profile-call-action">
+  <mat-card-content *ngIf="!authUser">
+    <h1>Do you know {{ userFirstName }}?</h1>
+    <p>
+      If you know {{ userFirstName }}, join our network to see their posts.
+    </p>
+  </mat-card-content>
+</mat-card>
+<div *ngIf="profileUser; else userNotFound" class="profile-grid">
+  <mat-card>
+    <mat-card-title>
+      <h1> {{ profileUser.fullName }} </h1>
+    </mat-card-title>
+    <mat-card-content>
+      <p>
+        <mat-icon>person</mat-icon>
+        <span>
+          {{ profileUser.bio }}
+        </span>
+      </p>
+      <p>
+        <mat-icon>calendar_today</mat-icon>
+        <span>
+          Member since {{ profileUser.createdAt }}
+        </span>
+      </p>
+      <p>
+        <mat-icon>article</mat-icon>
+        <span>
+          {{ profileUser.postsCount }} posts.
+        </span>
+      </p>
+      <button *ngIf="isAuthUserProfile" mat-raised-button color="primary" class="profile-bio-btn"
+        (click)="enableDisableEditing()">
+        Edit..
+      </button>
+      <div class="profile-settings" *ngIf="showEditSection && isAuthUserProfile">
+        <button mat-raised-button color="primary" class="profile-bio-btn" (click)="uploadCover.click()">
+          Upload cover
+        </button>
+        <input #uploadCover type='file' style="display:none" (change)="onCoverSelected($event)" />
+
+        <button mat-raised-button color="primary" class="profile-bio-btn" (click)="uploadPhoto.click()">
+          Upload photo
+        </button>
+        <input #uploadPhoto type='file' style="display:none" (change)="onPhotoSelected($event)" />
+
+        <div class="bio-box-wrapper">
+          <textarea #bioInput class="profile-bio-box" placeholder="Write a bio.."></textarea>
+        </div>
+        <button mat-raised-button color="primary" class="profile-bio-btn" (click)="setBio()">Add a new
+          bio..</button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  <div class="posts-column">
+  </div>
+</div>
+
+<ng-template #userNotFound>
+  <div class="user-not-found">
+    <p>
+      User not found!
+    </p>
+  </div>
+</ng-template>
