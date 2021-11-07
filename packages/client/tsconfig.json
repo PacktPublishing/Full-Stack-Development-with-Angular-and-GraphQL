@@ -20,12 +20,18 @@
       "dom",
       "esnext.asynciterable"
     ],
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "paths": {
+      "@ngsocial/graphql": ["../graphql-types/src"],
+      "@ngsocial/graphql/types": ["../graphql-types/src/types"],
+      "@ngsocial/graphql/documents": ["../graphql-types/src/client/graphql-operations"]
+    }
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
     "strictInjectionParameters": true,
     "strictInputAccessModifiers": true,
     "strictTemplates": true
-  }
+  },
+  "references": [{ "path": "../graphql-types" }]
 }
