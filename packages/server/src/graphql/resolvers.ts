@@ -1,16 +1,17 @@
 import { Context } from '..';
 import { Resolvers, User, Post, Comment, Like, Notification } from '@ngsocial/graphql';
 import { ApolloError } from 'apollo-server-errors';
-import { 
-  Post as PostEntity, 
+import {
+  Post as PostEntity,
   Comment as CommentEntity,
-  Like as LikeEntity } from '../entity'; 
+  Like as LikeEntity
+} from '../entity';
 import { DeleteResult, QueryFailedError, UpdateResult } from 'typeorm';
 import jsonwebtoken from 'jsonwebtoken';
 import crypto from 'crypto';
 import dotenv from 'dotenv';
 dotenv.config();
-import { GraphQLUpload } from 'graphql-upload'; 
+import { GraphQLUpload } from 'graphql-upload';
 import AWS from 'aws-sdk';
 const spacesEndpoint = new AWS.Endpoint(process.env.S3_ENDPOINT as string);
 const s3 = new AWS.S3({
@@ -18,8 +19,8 @@ const s3 = new AWS.S3({
   accessKeyId: process.env.S3_ACCESS_KEY_ID,
   secretAccessKey: process.env.S3_SECRET_ACCESS_KEY
 });
-import { PubSub } from 'graphql-subscriptions'; 
-const pubsub = new PubSub(); 
+import { PubSub } from 'graphql-subscriptions';
+const pubsub = new PubSub();
 
 const hashPassword = async (plainPassword: string): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -47,9 +48,15 @@ const resolvers: Resolvers = {
     message: () => 'It works!',
     getUser: async (_, args, ctx: Context) => {
       const orm = ctx.orm;
-      const user = await orm.userRepository.findOne({ where: { id: args.userId } });
+      const user = await orm
+        .userRepository
+        .findOne({
+          where:
+            { id: args.userId }});
       if (!user) {
-        throw new ApolloError("No user found", "USER_NOT_FOUND");
+        throw new ApolloError(
+          "No user found",
+          "USER_NOT_FOUND");
       }
       return user as unknown as User;
     },
@@ -62,7 +69,9 @@ const resolvers: Resolvers = {
         .leftJoinAndSelect("latestComment.author", "latestComment_author")
         .leftJoinAndSelect("post.likes", "likes")
         .leftJoinAndSelect("likes.user", "likes_user")
-        .orderBy("post.createdAt", "DESC").skip(args.offset as number).take(args.limit as number)
+        .orderBy("post.createdAt", "DESC")
+        .skip(args.offset as number)
+        .take(args.limit as number)
         .getMany();
       posts.forEach((post: PostEntity) => {
         if (post.likes?.find((like: LikeEntity) => { return like.user.id == ctx.authUser?.id })) {
@@ -79,7 +88,9 @@ const resolvers: Resolvers = {
         .leftJoinAndSelect("latestComment.author", "latestComment_author")
         .leftJoinAndSelect("post.likes", "likes")
         .leftJoinAndSelect("likes.user", "likes_user")
-        .orderBy("post.createdAt", "DESC").skip(args.offset as number).take(args.limit as number)
+        .orderBy("post.createdAt", "DESC")
+        .skip(args.offset as number)
+        .take(args.limit as number)
         .getMany();
       feed.forEach((post: PostEntity) => {
         if (post.likes?.find((like: LikeEntity) => { return like.user.id == ctx.authUser?.id })) {
@@ -116,7 +127,8 @@ const resolvers: Resolvers = {
         .getMany() as unknown as Like[];
     },
     searchUsers: async (_, args, ctx: Context) => {
-      const users = await ctx.orm.userRepository.createQueryBuilder("user")
+      const users = await ctx.orm.userRepository
+        .createQueryBuilder("user")
         .where(`user.fullName Like '%${args.searchQuery}%'`)
         .orWhere(`user.username Like '%${args.searchQuery}%'`)
         .getMany();
@@ -132,8 +144,8 @@ const resolvers: Resolvers = {
           author: await orm.userRepository.findOne(authUser?.id)
         } as unknown as PostEntity
       );
-      const savedPost = await orm.postRepository.save(post);
       await orm.userRepository.update({ id: authUser?.id }, { postsCount: post.author.postsCount + 1 });
+      const savedPost = await orm.postRepository.save(post);
       return savedPost as unknown as Post;
     },
     comment: async (_, args, { orm, authUser }: Context) => {
@@ -149,7 +161,7 @@ const resolvers: Resolvers = {
         latestComment: savedComment
       });
       savedComment.post = await orm.postRepository.findOne(args.postId) as PostEntity;
-      pubsub.publish('ON_POST_COMMENTED', { onPostCommented: savedComment }); 
+      pubsub.publish('ON_POST_COMMENTED', { onPostCommented: savedComment });
       return savedComment as unknown as Comment;
     },
     like: async (_, args, { orm, authUser }: Context) => {
@@ -163,7 +175,7 @@ const resolvers: Resolvers = {
       });
 
       savedLike.post = await orm.postRepository.findOne(args.postId) as PostEntity;
-      pubsub.publish('ON_POST_LIKED', { onPostLiked: savedLike }); 
+      pubsub.publish('ON_POST_LIKED', { onPostLiked: savedLike });
       return savedLike as unknown as Like;
     },
     removeLike: async (_, args, { orm, authUser }: Context) => {
@@ -330,21 +342,21 @@ const resolvers: Resolvers = {
     },
     setUserBio: async (_, args, { orm, authUser }: Context) => {
       const updateResult: UpdateResult = await orm.userRepository.update(
-        { id: authUser?.id }, 
-        { bio: args.bio }); 
-        if(updateResult.affected && updateResult.affected == 0){
-          throw new ApolloError("User bio update failed", "USER_BIO_UPDATE_FAILED");
-        }     
-      return await orm.userRepository.findOne(authUser?.id) as unknown as User;      
+        { id: authUser?.id },
+        { bio: args.bio });
+      if (updateResult.affected && updateResult.affected == 0) {
+        throw new ApolloError("User bio update failed", "USER_BIO_UPDATE_FAILED");
+      }
+      return await orm.userRepository.findOne(authUser?.id) as unknown as User;
     }
   },
-  Subscription: { 
-    onPostCommented: { 
-      subscribe: () => pubsub.asyncIterator(['ON_POST_COMMENTED']) 
-    }, 
-    onPostLiked: { 
-      subscribe: () => pubsub.asyncIterator(['ON_POST_LIKED']) 
-    } 
-  } 
+  Subscription: {
+    onPostCommented: {
+      subscribe: () => pubsub.asyncIterator(['ON_POST_COMMENTED'])
+    },
+    onPostLiked: {
+      subscribe: () => pubsub.asyncIterator(['ON_POST_LIKED'])
+    }
+  }
 };
 export default resolvers;
