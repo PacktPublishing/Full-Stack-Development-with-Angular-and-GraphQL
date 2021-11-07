@@ -12,6 +12,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatBadgeModule } from '@angular/material/badge';
+import { CreatePostComponent } from './components/create-post/create-post.component';
 
 const matModules = [
   MatToolbarModule,
@@ -28,10 +29,10 @@ const matModules = [
 ];
 
 @NgModule({
-  declarations: [],
+  declarations: [CreatePostComponent],
   imports: [
     CommonModule, ReactiveFormsModule, ...matModules
   ],
-  exports: [ReactiveFormsModule, ...matModules]
+  exports: [ReactiveFormsModule, ...matModules, CreatePostComponent]
 })
 export class SharedModule { }

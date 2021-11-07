@@ -61,6 +61,9 @@
     </mat-card-content>
   </mat-card>
   <div class="posts-column">
+    <app-create-post [authUser]="authUser" [loading]="loading" (post)="onPost($event)"
+      *ngIf="isAuthUserProfile && authUser">
+    </app-create-post>
   </div>
 </div>
 
