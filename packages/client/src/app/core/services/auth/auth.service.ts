@@ -21,6 +21,7 @@ import { RegisterGQL } from './graphql/register.service';
 import { ApolloQueryResult } from '@apollo/client/core';
 import { authState, GET_AUTH_STATE } from 'src/app/reactive';
 
+
 @Injectable({
   providedIn: 'root'
 })
@@ -35,6 +36,10 @@ export class AuthService {
     let isLoggedIn = false;
     if (localToken) {
       isLoggedIn = this.tokenExists() && !this.tokenExpired(localToken);
+    }
+    if(!isLoggedIn){
+      localStorage.removeItem(ACCESS_TOKEN);
+      localStorage.removeItem(AUTH_USER);
     }
     authState({
       isLoggedIn: isLoggedIn,
@@ -168,3 +173,4 @@ export class AuthService {
     this.resetAuthState();
   }
 }
+
