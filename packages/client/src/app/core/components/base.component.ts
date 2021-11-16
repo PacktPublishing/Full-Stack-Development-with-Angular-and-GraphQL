@@ -9,7 +9,8 @@ import {
 } from 'rxjs';
 import {
   mergeMap,
-  takeUntil
+  takeUntil,
+  take
 } from 'rxjs/operators';
 import { MatSnackBar }
   from '@angular/material/snack-bar';
@@ -88,8 +89,7 @@ export abstract class BaseComponent
     this.loading = true;
     this.postService
       .createPost(text, null)
-      .pipe(
-        takeUntil(this.componentDestroyed))
+      .pipe(take(1))
       .subscribe({
         next: (post) => {
           if (post) {
@@ -109,7 +109,7 @@ export abstract class BaseComponent
         mergeMap(uploadFile => this.postService
           .createPost(text, uploadFile?.url || null)
         ),
-        takeUntil(this.componentDestroyed)
+        take(1)
       ).subscribe({
         next: (post) => {
           this.loading = false;
@@ -132,7 +132,7 @@ export abstract class BaseComponent
   onRemovePost(e: RemovePostEvent): void {
     this.postService
       .removePost(e.id)
-      .pipe(takeUntil(this.componentDestroyed))
+      .pipe(take(1))
       .subscribe({
         next: () => {
           this.displayMessage('Post deleted.');
