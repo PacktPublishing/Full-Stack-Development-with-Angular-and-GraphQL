@@ -68,6 +68,9 @@ export class ProfileComponent
       ?.split(' ')
       ?.shift();
   }
+  postComments(postId: string){
+    return this.comments.get(postId)?.result!;
+  }
   ngOnInit(): void {
     super.ngOnInit();
     const userObs = this.route.paramMap

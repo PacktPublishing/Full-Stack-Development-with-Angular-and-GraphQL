@@ -68,7 +68,14 @@
       <app-post [post]="post" [authUser]="authUser"
         (remove)="onRemovePost($event)"
         (comment)= "onComment($event)"
-        (like)= "onLike($event)">
+        (like)= "onLike($event)"
+        (listComments)= "onListComments($event)"
+        (moreComments)= "onLoadMoreComments($event)">
+        <div 
+         class="comments-section" 
+         *ngFor="let comment of postComments(post.id)">
+           <app-comment [comment]="comment" (removeComment)="onRemoveComment($event)"></app-comment>
+        </div>
       </app-post>
     </div>
     <button *ngIf="authUser && profileUser.postsCount && profileUser.postsCount > posts.length" mat-raised-button color="primary"

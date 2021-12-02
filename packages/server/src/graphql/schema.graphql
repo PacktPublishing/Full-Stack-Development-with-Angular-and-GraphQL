@@ -91,3 +91,7 @@ type Subscription {
   onPostCommented: Comment
   onPostLiked: Like
 }
+
+extend type Post {
+  comments: [Comment]
+}

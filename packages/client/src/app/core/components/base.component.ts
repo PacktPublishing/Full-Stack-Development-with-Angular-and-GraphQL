@@ -20,12 +20,15 @@ import {
 } from '../services';
 import {
   User,
-  Post
+  Post,
+  Comment
 } from '@ngsocial/graphql/types';
 import {
   CommentEvent,
   LikeEvent,
+  ListCommentsEvent, MoreCommentsEvent,
   PostEvent,
+  RemoveCommentEvent,
   RemovePostEvent
 } from 'src/app/shared';
 import { CommentsService }
@@ -41,6 +44,11 @@ export abstract class BaseComponent
   public authService: AuthService;
   public postService: PostService;
   public posts: Post[] = [];
+  public comments: Map<string,
+    {
+      result: Comment[],
+      fetchMore: () => void
+    }> = new Map();
   public authUser: Partial<User> | null = null;
   public loading: boolean = false;
   protected snackBar: MatSnackBar;
@@ -174,5 +182,45 @@ export abstract class BaseComponent
           error: (err) => this.handleErrors(err)
         });
     }
+  }
+  onListComments(e: ListCommentsEvent): void {
+    const qRef = this.commentsService
+      .getCommentsByPostId(e.postId);
+    const fetchMore = () => {
+      qRef.fetchMore({
+        variables: {
+          offset: this.comments.get(e.postId)?.result.length
+        }
+      })
+    }
+    qRef
+      .valueChanges
+      .pipe(takeUntil(this.componentDestroyed))
+      .subscribe({
+        next: (result) => {
+          this.comments
+            .set(
+              e.postId,
+              {
+                result: result.data.getCommentsByPostId as Comment[],
+                fetchMore: fetchMore
+              });
+          console.log("Fetched comments", this.comments);
+        }
+      });
+  }
+
+  onLoadMoreComments(e: MoreCommentsEvent): void {
+    const fetchMore = this.comments
+      .get(e.postId)?.fetchMore!;
+    fetchMore();
+  }
+  onRemoveComment(e: RemoveCommentEvent) {
+    this.commentsService
+      .removeComment(e.id)
+      .pipe(take(1))
+      .subscribe({
+        error: (err) => this.handleErrors(err)
+      });
   }
 }

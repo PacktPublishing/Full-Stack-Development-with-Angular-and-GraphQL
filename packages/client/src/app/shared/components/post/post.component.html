@@ -54,7 +54,10 @@
    <div class="comment-box" *ngIf="commentsShown">
     <textarea #commentInput placeholder="Leave a comment.." matInput (keydown.enter)="createComment($event)"></textarea>
    </div>
-   
+   <div>
+    <ng-content></ng-content>
+   </div>
+
    <button mat-button class="load-comments-btn" (click)="loadComments()"
     *ngIf="commentsShown && post.commentsCount > commentsPerPost">
     Load more comments
