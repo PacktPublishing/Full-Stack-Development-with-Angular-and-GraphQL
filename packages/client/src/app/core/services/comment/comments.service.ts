@@ -23,6 +23,17 @@ export class CommentsService {
       .mutate({
         comment: comment,
         postId: postId
+      }, {
+        update(cache, comment) {
+          cache.modify({
+            fields: {
+              getCommentsByPostId(existingComments) {
+                const comments = [ comment,...existingComments]
+                return comments;
+              }
+            }
+          });
+        }
       })
       .pipe(map(result => result.data!.comment));
   }
@@ -30,7 +41,22 @@ export class CommentsService {
     return this.removeCommentGQL
       .mutate({
         id: id
-      })
+      },
+        {
+          update(cache) {
+            cache.modify({
+              fields: {
+                getCommentsByPostId(existingComments, { readField }) {
+                  return existingComments
+                    .filter((cc: StoreObject) => {
+                      return id !== readField('id', cc)
+                    });
+                }
+              }
+            });
+          }
+        }
+      )
       .pipe(map(result => result.data!.removeComment));
   }
   getCommentsByPostId(
