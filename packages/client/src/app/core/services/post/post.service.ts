@@ -5,6 +5,13 @@ import {
   RemovePostGQL,
   UploadFileGQL
 } from 'src/app/core';
+import { Apollo } from 'apollo-angular';
+import {
+  GetPostsByUserIdDocument,
+  GetPostsByUserIdQuery,
+  GetPostsByUserIdQueryVariables
+} from '@ngsocial/graphql/documents'; 
+import { Post } from '@ngsocial/graphql/types';
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +21,8 @@ export class PostService {
   constructor(
     private createPostGQL: CreatePostGQL,
     private removePostGQL: RemovePostGQL,
-    private uploadFileGQL: UploadFileGQL) { }
+    private uploadFileGQL: UploadFileGQL,
+    private apollo: Apollo) { }
 
   uploadFile(image: File) {
     return this.uploadFileGQL.mutate(
@@ -41,5 +49,24 @@ export class PostService {
         id: id
       })
       .pipe(map(result => result.data!.removePost));
+  }
+  getPostsByUserId(
+    userId: string,
+    offset?: number,
+    limit?: number) {
+
+    const queryRef = this.apollo
+      .watchQuery<
+        GetPostsByUserIdQuery,
+        GetPostsByUserIdQueryVariables>({
+          query: GetPostsByUserIdDocument,
+          variables: {
+            userId: userId,
+            offset: offset || 0,
+            limit: limit || 10
+          },
+          fetchPolicy: 'cache-and-network',
+        });
+    return queryRef;
   }
 }
