@@ -68,7 +68,7 @@ export class CommentsService {
         {
           postId: postId,
           offset: offset || 0,
-          limit: limit || 10
+          limit: limit || 5
         }, {
         fetchPolicy: 'cache-and-network'
       });
