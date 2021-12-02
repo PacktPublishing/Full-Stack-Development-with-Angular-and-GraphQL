@@ -54,10 +54,42 @@ export class PostComponent implements OnInit {
   get latestLike(): string {
     return `${this.post?.likesCount ?? 0} Likes`;
   }
-  displayLikes(): void {}
-  displayComments(): void {}
-  loadComments(): void {}
-  sendLike(): void {}
-  removePost(): void {}
-  createComment(e: Event): void {}
+  displayLikes(): void {
+    this.listLikes.emit({
+      postId: this.post.id
+    });
+  }
+  displayComments(): void {
+    this.commentsShown = !this.commentsShown;
+    if (this.commentsShown) {
+      this.listComments.emit({
+        postId: this.post.id
+      });
+    }
+  }
+  loadComments(): void {
+    this.moreComments.emit({
+      postId: this.post.id
+    });
+  }
+  sendLike(): void {
+    this.like.emit({
+      post: this.post
+    });
+  }
+  removePost(): void {
+    this.remove.emit({
+      id: this.post.id
+    });
+  }
+  createComment(e: Event): void {
+    e.preventDefault();
+    this.comment.emit({
+      comment: this.commentInput.nativeElement.value,
+      postId: this.post.id
+    });
+    if (this.commentInput) {
+      this.commentInput.nativeElement.value = '';
+    }
+  }
 }
