@@ -64,6 +64,11 @@
     <app-create-post [authUser]="authUser" [loading]="loading" (post)="onPost($event)"
       *ngIf="isAuthUserProfile && authUser">
     </app-create-post>
+    <div *ngFor="let post of posts;">
+      <app-post [post]="post" [authUser]="authUser"
+        (remove)="onRemovePost($event)">
+      </app-post>
+    </div>
   </div>
 </div>
 

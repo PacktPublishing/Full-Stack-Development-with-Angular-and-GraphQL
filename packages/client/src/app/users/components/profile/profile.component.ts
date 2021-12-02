@@ -8,7 +8,7 @@ import {
   ActivatedRoute,
   ParamMap
 } from '@angular/router';
-import { User }
+import { Post, User }
   from '@ngsocial/graphql/types';
 import {
   User
@@ -67,7 +67,6 @@ export class ProfileComponent
       ?.split(' ')
       ?.shift();
   }
-
   ngOnInit(): void {
     super.ngOnInit();
     const userObs = this.route.paramMap
@@ -76,15 +75,30 @@ export class ProfileComponent
           const userId = params.get('userId')!;
           return this.authService.getUser(userId);
         }),
+        switchMap((userResponse) => {
+          this.setProfileUser(userResponse.getUser);
+          this.setIsAuthUserProfile();
+          const qRef =  this.postService
+            .getPostsByUserId(userResponse.getUser.id);
+          return qRef.valueChanges;
+        }),
         takeUntil(this.destroyNotifier)
       );
-    userObs.subscribe({
-      next: (userResponse) => {
-        this.setProfileUser(userResponse.getUser);
-        this.setIsAuthUserProfile();
-      },
-      error: (err) => super.handleErrors(err)
-    });
+    userObs
+      .pipe(getPostsObs => {
+        this.loading = true;
+        return getPostsObs;
+      })
+      .subscribe({
+        next: (result) => {
+          this.loading = result.loading;
+          this.posts = result
+            .data
+            .getPostsByUserId as Post[];
+          console.log(this.posts);
+        },
+        error: (err) => super.handleErrors(err)
+      });
   }
   private setProfileUser(user: Partial<User>) {
     this.profileUser = user;
