@@ -54,7 +54,7 @@
    <div class="comment-box" *ngIf="commentsShown">
     <textarea #commentInput placeholder="Leave a comment.." matInput (keydown.enter)="createComment($event)"></textarea>
    </div>
-   <div>
+   <div *ngIf="commentsShown">
     <ng-content></ng-content>
    </div>
 
