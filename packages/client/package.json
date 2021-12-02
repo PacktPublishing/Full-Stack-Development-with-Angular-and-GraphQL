@@ -24,6 +24,7 @@
     "apollo-angular": "^2.6.0",
     "graphql": "^15.0.0",
     "rxjs": "~6.6.0",
+    "timeago.js": "^4.0.2",
     "tslib": "^2.3.0",
     "zone.js": "~0.11.4"
   },

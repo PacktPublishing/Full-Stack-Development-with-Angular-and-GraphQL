@@ -1,6 +1,7 @@
 import { InMemoryCache } from '@apollo/client/core';
 import { offsetLimitPagination } from '@apollo/client/utilities';
 import { authState } from './reactive';
+import * as timeago from 'timeago.js';
 
 export default new InMemoryCache({
     typePolicies: {
@@ -30,6 +31,24 @@ export default new InMemoryCache({
                                 year: 'numeric',
                                 month: 'long'
                             });
+                    }
+                }
+            }
+        },
+        Post: {
+            fields: {
+                createdAt: {
+                    read(createdAt) {
+                        return timeago.format(createdAt)
+                    }
+                }
+            }
+        }, 
+        Comment: {
+            fields: {
+                createdAt: {
+                    read(createdAt) {
+                        return timeago.format(createdAt)
                     }
                 }
             }
