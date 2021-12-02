@@ -40,7 +40,7 @@ export class PostService {
       .mutate({
         text: text,
         image: image
-      })
+      }, { refetchQueries: ['getUser']})
       .pipe(map(result => result.data!.post));
   }
   removePost(id: string) {
