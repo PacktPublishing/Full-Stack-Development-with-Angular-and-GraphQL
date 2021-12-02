@@ -69,6 +69,8 @@
         (remove)="onRemovePost($event)">
       </app-post>
     </div>
+    <button *ngIf="authUser && profileUser.postsCount && profileUser.postsCount > posts.length" mat-raised-button color="primary"
+      (click)="fetchMore()">More</button> 
   </div>
 </div>
 

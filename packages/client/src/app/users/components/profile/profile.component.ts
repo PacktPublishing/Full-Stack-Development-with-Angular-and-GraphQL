@@ -41,6 +41,7 @@ export class ProfileComponent
   profileUser: Partial<User> | null = null;
   showEditSection: boolean = false;
   isAuthUserProfile: boolean = false;
+  fetchMore!: () => void;
   constructor(
     private route: ActivatedRoute,
     private profileService: ProfileService,
@@ -80,6 +81,13 @@ export class ProfileComponent
           this.setIsAuthUserProfile();
           const qRef =  this.postService
             .getPostsByUserId(userResponse.getUser.id);
+          this.fetchMore = () => {
+            qRef.fetchMore({
+              variables: {
+                offset: this.posts.length
+              }
+            });
+          }
           return qRef.valueChanges;
         }),
         takeUntil(this.destroyNotifier)
