@@ -21,11 +21,17 @@ import {
 import {
   User,
   Post
-} from '@ngsocial/graphql/types'
+} from '@ngsocial/graphql/types';
 import {
+  CommentEvent,
+  LikeEvent,
   PostEvent,
   RemovePostEvent
 } from 'src/app/shared';
+import { CommentsService }
+  from '../services/comment/comments.service';
+import { LikesService }
+  from '../services/like/likes.service';
 
 @Component({
   template: ''
@@ -39,11 +45,15 @@ export abstract class BaseComponent
   public loading: boolean = false;
   protected snackBar: MatSnackBar;
   private componentDestroyed = new Subject();
+  public commentsService: CommentsService;
+  public likesService: LikesService;
 
   constructor(public injector: Injector) {
     this.snackBar = injector.get(MatSnackBar);
     this.authService = injector.get(AuthService);
     this.postService = injector.get(PostService);
+    this.commentsService = injector.get(CommentsService);
+    this.likesService = injector.get(LikesService);
   }
   ngOnInit(): void {
     this.authService
@@ -139,5 +149,30 @@ export abstract class BaseComponent
         },
         error: (err) => this.handleErrors(err)
       });
+  }
+  onComment(e: CommentEvent): void {
+    this.commentsService
+      .createComment(e.comment, e.postId)
+      .pipe(take(1))
+      .subscribe({
+        error: (err) => this.handleErrors(err)
+      });
+  }
+  onLike(e: LikeEvent): void {
+    if (e.post.likedByAuthUser) {
+      this.likesService
+        .removeLike(e.post.id)
+        .pipe(take(1))
+        .subscribe({
+          error: (err) => this.handleErrors(err)
+        });
+    } else {
+      this.likesService
+        .likePost(e.post.id)
+        .pipe(take(1))
+        .subscribe({
+          error: (err) => this.handleErrors(err)
+        });
+    }
   }
 }

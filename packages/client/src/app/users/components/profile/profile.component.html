@@ -66,7 +66,9 @@
     </app-create-post>
     <div *ngFor="let post of posts;">
       <app-post [post]="post" [authUser]="authUser"
-        (remove)="onRemovePost($event)">
+        (remove)="onRemovePost($event)"
+        (comment)= "onComment($event)"
+        (like)= "onLike($event)">
       </app-post>
     </div>
     <button *ngIf="authUser && profileUser.postsCount && profileUser.postsCount > posts.length" mat-raised-button color="primary"
