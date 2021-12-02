@@ -47,7 +47,7 @@ export class PostService {
     return this.removePostGQL
       .mutate({
         id: id
-      })
+      }, {refetchQueries: ['getUser']})
       .pipe(map(result => result.data!.removePost));
   }
   getPostsByUserId(
