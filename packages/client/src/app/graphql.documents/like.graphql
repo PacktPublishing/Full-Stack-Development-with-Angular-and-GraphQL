@@ -1,0 +1,27 @@
+query getLikesByPostId(
+ $postId: ID!, 
+ $offset: Int, 
+ $limit: Int){ 
+ getLikesByPostId(
+  postId:$postId, 
+  offset: $offset, 
+  limit: $limit){
+  id 
+  user { ...BasicUserFields } 
+  post { id likesCount } 
+  createdAt
+ }
+} 
+mutation likePost(
+ $postId: ID!){ 
+ like(postId:$postId){ 
+  id post {  id ...LikesInfo }
+ } 
+}
+mutation removeLike(
+ $postId: ID!){ 
+ removeLike(postId:$postId){
+  id post { id ...LikesInfo }
+ }
+} 
+
