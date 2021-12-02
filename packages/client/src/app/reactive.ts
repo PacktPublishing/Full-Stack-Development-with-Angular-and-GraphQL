@@ -16,3 +16,4 @@ export const GET_AUTH_STATE = gql`
   }
 `;
 
+export const commentsShownState = makeVar<boolean>(false);

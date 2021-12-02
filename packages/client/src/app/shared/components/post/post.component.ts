@@ -11,6 +11,8 @@ import {
   User,
   Post
 } from '@ngsocial/graphql/types';
+import { commentsShownState }
+  from 'src/app/reactive';
 
 import {
   RemovePostEvent,
@@ -50,6 +52,7 @@ export class PostComponent implements OnInit {
   
   constructor() { }
   ngOnInit(): void {
+    this.commentsShown = commentsShownState();
   }
   get latestLike(): string {
     return `${this.post?.likesCount ?? 0} Likes`;
@@ -66,6 +69,7 @@ export class PostComponent implements OnInit {
         postId: this.post.id
       });
     }
+    commentsShownState(this.commentsShown);
   }
   loadComments(): void {
     this.moreComments.emit({
