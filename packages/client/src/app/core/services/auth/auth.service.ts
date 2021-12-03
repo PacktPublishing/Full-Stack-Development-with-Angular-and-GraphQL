@@ -20,6 +20,8 @@ import { LoginGQL } from './graphql/login.service';
 import { RegisterGQL } from './graphql/register.service';
 import { ApolloQueryResult } from '@apollo/client/core';
 import { authState, GET_AUTH_STATE } from 'src/app/reactive';
+import { createApollo } from 'src/app/graphql.module';
+import { HttpLink } from 'apollo-angular/http';
 
 
 @Injectable({
@@ -30,7 +32,8 @@ export class AuthService {
     private apollo: Apollo,
     private registerGQL: RegisterGQL,
     private loginGQL: LoginGQL,
-    private getUserGQL: GetUserGQL) {
+    private getUserGQL: GetUserGQL,
+    private httpLink: HttpLink) {
 
     const localToken = this.getLocalToken();
     let isLoggedIn = false;
@@ -137,6 +140,8 @@ export class AuthService {
             if (data?.signIn.token && data?.signIn.user) {
               const token: string = data?.signIn.token, user = data?.signIn.user;
               this.updateAuthState(token, user);
+              const acOpts = createApollo(this.httpLink);
+              this.apollo.client.setLink(acOpts.link!);
             }
           }
         }));
