@@ -83,15 +83,15 @@ async function startApolloServer() {
   const subscriptionServer = SubscriptionServer.create(
     { 
       schema, execute, subscribe, onConnect: (connectionParams: ConnectionParams) => {
-        const token = connectionParams.get('authToken') || '';
-        if (token != '') {
-          const authUser = getAuthUser(token.split(' ')[1]);
-          return {
-            authUser: authUser
-          }
-        }
-        throw new AuthenticationError('User is not authenticated');
-      }
+                const token = connectionParams['authToken'] || '';
+                if (token != '') {
+                  const authUser = getAuthUser(token.split(' ')[1]);
+                  return {
+                    authUser: authUser
+                  }
+                }
+                throw new AuthenticationError('User is not authenticated');
+              }
     },
     { server: httpServer, path: server.graphqlPath }
   );
