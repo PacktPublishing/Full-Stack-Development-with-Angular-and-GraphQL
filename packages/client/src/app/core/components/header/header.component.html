@@ -10,10 +10,10 @@
         </div>
 
         <span class="spacer"></span>
-
         <button *ngIf="isLoggedIn" mat-icon-button matTooltip="Notifications">
-            <mat-icon aria-hidden="false" aria-label="Notifications">
-                notifications</mat-icon>
+            <mat-icon aria-hidden="false" aria-label="Notifications" [matBadge]="notificationsCount" matBadgeColor="warn">
+                notifications
+            </mat-icon>
         </button>
         <button *ngIf="isLoggedIn" mat-icon-button matTooltip="My profile" routerLink="/users/profile/{{authUser?.id}}">
             <mat-icon aria-hidden="false" aria-label="My profile">person</mat-icon>

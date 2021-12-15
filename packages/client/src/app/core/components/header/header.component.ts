@@ -7,6 +7,10 @@ import { SearchDialogComponent } from '../search-dialog/search-dialog.component'
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { first, takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
+import {
+  OnPostCommentedGQL,
+  OnPostLikedGQL
+} from '../../gql.services';
 
 @Component({
   selector: 'app-header',
@@ -19,12 +23,15 @@ export class HeaderComponent implements OnInit, OnDestroy {
   public isLoggedIn: boolean = false;
   public authUser: User | null = null;
   private destroyNotifier$: Subject<boolean> = new Subject<boolean>();
+  public notificationsCount: number = 0; 
   constructor(
     public authService: AuthService,
     public matDialog: MatDialog,
     private router: Router, 
     private snackBar: MatSnackBar, 
-    private changeDetectorRef: ChangeDetectorRef) { }
+    private changeDetectorRef: ChangeDetectorRef, 
+    private onPostCommentedGQL: OnPostCommentedGQL, 
+    private onPostLiked: OnPostLikedGQL) { }
 
   ngOnInit(): void {
     this.authService.authState
@@ -34,6 +41,32 @@ export class HeaderComponent implements OnInit, OnDestroy {
         this.isLoggedIn = authState.isLoggedIn;
         this.authUser = authState.currentUser;
         this.changeDetectorRef.markForCheck();
+        this.subscribeToNewComments();
+        this.subscribeToNewLikes();
+      }
+    });
+  }
+  subscribeToNewComments() {
+    const onPostCommentedObs = this.onPostCommentedGQL.subscribe();
+    onPostCommentedObs.subscribe({
+      next: (result) => {
+        const comment = result.data?.onPostCommented;
+        if (this.authUser?.id !== comment?.author.id) {
+          this.notificationsCount++;
+          this.changeDetectorRef.markForCheck();
+        }
+      }
+    });
+  }
+  subscribeToNewLikes() {
+    const onPostLikedObs = this.onPostLiked.subscribe();
+    onPostLikedObs.subscribe({
+      next: (result) => {
+        const like = result.data?.onPostLiked;
+        if (this.authUser?.id !== like?.user.id) {
+          this.notificationsCount++;
+          this.changeDetectorRef.markForCheck();
+        }
       }
     });
   }
@@ -76,4 +109,3 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   }
 }
-
