@@ -131,6 +131,8 @@ const resolvers: Resolvers = {
         .createQueryBuilder("user")
         .where(`user.fullName Like '%${args.searchQuery}%'`)
         .orWhere(`user.username Like '%${args.searchQuery}%'`)
+        .skip(args.offset as number)
+        .take(args.limit as number)
         .getMany();
       return users as unknown as User[];
     }

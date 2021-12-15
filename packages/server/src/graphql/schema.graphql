@@ -68,7 +68,7 @@ type Query {
   getNotificationsByUserId(userId: ID!, offset: Int, limit: Int): [Notification] @auth
   getCommentsByPostId(postId: ID!, offset: Int, limit: Int): [Comment] @auth
   getLikesByPostId(postId: ID!, offset: Int, limit: Int): [Like] @auth
-  searchUsers(searchQuery: String): [User] @auth
+  searchUsers(searchQuery: String, offset: Int, limit: Int): [User] @auth
 } 
 
 type Mutation {

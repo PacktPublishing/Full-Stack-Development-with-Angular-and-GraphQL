@@ -208,6 +208,8 @@ export type QueryGetUserArgs = {
 
 
 export type QuerySearchUsersArgs = {
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
   searchQuery?: Maybe<Scalars['String']>;
 };
 

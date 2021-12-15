@@ -12,7 +12,13 @@ export const USER_QUERY = gql`
 `;
 export const SEARCH_USERS_QUERY = gql` 
  ${BASIC_USER_FIELDS_FRAGMENT}
- query searchUsers($searchQuery: String!){  
-  searchUsers(searchQuery:$searchQuery){ __typename ...BasicUserFields }
+ query searchUsers(
+  $searchQuery: String!,
+  $offset: Int, 
+  $limit: Int){  
+  searchUsers(
+    searchQuery:$searchQuery,
+    offset: $offset,
+    limit: $limit){ __typename ...BasicUserFields }
  }  
 `;

@@ -12,6 +12,7 @@ export default new InMemoryCache({
                         return authState();
                     }
                 },
+                searchUsers: offsetLimitPagination(),
                 getPostsByUserId: offsetLimitPagination(['userId']),
                 getCommentsByPostId: offsetLimitPagination(['id', 'postId'])
             }
