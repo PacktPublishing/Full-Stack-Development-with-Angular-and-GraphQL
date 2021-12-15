@@ -1,4 +1,6 @@
 import { Injectable } from '@angular/core';
+import { OnPostLikedDocument }
+  from '@ngsocial/graphql/documents';
 import { map } from 'rxjs/operators';
 import {
   LikePostGQL,
@@ -38,6 +40,25 @@ export class LikesService {
         fetchPolicy: 'cache-and-network'
       }
     );
+    queryRef.subscribeToMore({
+      document: OnPostLikedDocument,
+      updateQuery: (prev, { subscriptionData }) => {
+        if (!subscriptionData.data) {
+          return prev;
+        }
+        const newLike = subscriptionData
+          .data
+          .onPostLiked!;
+        console.log("New like coming: ", subscriptionData.data);
+        if (newLike.post.id !== postId) {
+          return prev;
+        }
+        return {
+          getLikesByPostId: [newLike,
+            ...prev.getLikesByPostId!]
+        };
+      }
+    });
     return queryRef;
   }
 }

@@ -38,6 +38,17 @@ import * as Apollo from 'apollo-angular';
   @Injectable({
     providedIn: 'root'
   })
+  export class OnPostCommentedGQL extends Apollo.Subscription<Operations.OnPostCommentedSubscription, Operations.OnPostCommentedSubscriptionVariables> {
+    document = Operations.OnPostCommentedDocument;
+    
+    constructor(apollo: Apollo.Apollo) {
+      super(apollo);
+    }
+  }
+
+  @Injectable({
+    providedIn: 'root'
+  })
   export class GetLikesByPostIdGQL extends Apollo.Query<Operations.GetLikesByPostIdQuery, Operations.GetLikesByPostIdQueryVariables> {
     document = Operations.GetLikesByPostIdDocument;
     
@@ -62,6 +73,17 @@ import * as Apollo from 'apollo-angular';
   })
   export class RemoveLikeGQL extends Apollo.Mutation<Operations.RemoveLikeMutation, Operations.RemoveLikeMutationVariables> {
     document = Operations.RemoveLikeDocument;
+    
+    constructor(apollo: Apollo.Apollo) {
+      super(apollo);
+    }
+  }
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class OnPostLikedGQL extends Apollo.Subscription<Operations.OnPostLikedSubscription, Operations.OnPostLikedSubscriptionVariables> {
+    document = Operations.OnPostLikedDocument;
     
     constructor(apollo: Apollo.Apollo) {
       super(apollo);

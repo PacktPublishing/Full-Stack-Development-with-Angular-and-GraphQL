@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
 import { StoreObject } from '@apollo/client/core';
+import { OnPostCommentedDocument }
+  from '@ngsocial/graphql/documents';
 import { map } from 'rxjs/operators';
 import {
   CommentPostGQL,
@@ -72,6 +74,26 @@ export class CommentsService {
         }, {
         fetchPolicy: 'cache-and-network'
       });
+    queryRef.subscribeToMore({
+      document: OnPostCommentedDocument,
+      updateQuery: (prev, { subscriptionData }) => {
+        console.log("New comment coming: ", subscriptionData.data);
+        if (!subscriptionData.data) {
+          return prev;
+        }
+        const newComment = subscriptionData
+          .data
+          .onPostCommented!;
+        console.log("New comment coming: ", subscriptionData.data);
+        if (newComment.post.id !== postId) {
+          return prev;
+        }
+        return {
+          getCommentsByPostId: [newComment,
+            ...prev.getCommentsByPostId!]
+        };
+      }
+    });
     return queryRef;
   }
 }

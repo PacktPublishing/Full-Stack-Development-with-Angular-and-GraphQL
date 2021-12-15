@@ -23,5 +23,13 @@ mutation removeLike(
  removeLike(postId:$postId){
   id post { id ...LikesInfo }
  }
-} 
+}
+subscription onPostLiked{
+ onPostLiked{
+  id 
+  user { ...BasicUserFields } 
+  post { id likesCount } 
+  createdAt
+ }
+}
 

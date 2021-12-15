@@ -31,4 +31,11 @@ mutation removeComment($id: ID!){
  removeComment(id:$id){
   id post { id commentsCount }
  }
-} 
+}
+subscription onPostCommented{
+ onPostCommented {
+  ...CommentFields
+  author { ...BasicUserFields }
+  post { id commentsCount }
+ }
+}
