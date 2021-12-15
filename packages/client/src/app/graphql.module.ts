@@ -1,10 +1,16 @@
 import { NgModule } from '@angular/core';
 import { APOLLO_OPTIONS } from 'apollo-angular';
-import { ApolloClientOptions, from } from '@apollo/client/core';
+import {
+  ApolloClientOptions,
+  from,
+  split
+} from '@apollo/client/core';
 import { HttpLink } from 'apollo-angular/http';
 import { setContext } from '@apollo/client/link/context';
 import { HttpHeaders } from '@angular/common/http';
 import cache from './cache';
+import { WebSocketLink } from '@apollo/client/link/ws';
+import { getMainDefinition } from '@apollo/client/utilities';
 
 const uri = 'http://localhost:8080/graphql'; // <-- add the URL of the GraphQL server here
 export function createApollo(httpLink: HttpLink ): ApolloClientOptions<any> {
@@ -15,8 +21,30 @@ export function createApollo(httpLink: HttpLink ): ApolloClientOptions<any> {
       'Authorization', `Bearer ${accessToken}`
     )
   }));
+  const ws = new WebSocketLink({
+    uri: 'ws://localhost:8080/graphql',
+    options: {
+      reconnect: true,
+      connectionParams: {
+        authToken: accessToken
+      }
+    }
+  });
+
+  const splitLink = split(
+    ({ query }) => {
+      const definition = getMainDefinition(query);
+      return (
+        definition.kind === 'OperationDefinition' &&
+        definition.operation === 'subscription'
+      );
+    },
+    ws,
+    http
+  );
+
   return {
-    link: from([setAuthorizationLink, http]), 
+    link: from([setAuthorizationLink, splitLink]), 
     cache: cache
   };
 }
