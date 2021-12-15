@@ -15,6 +15,7 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { CreatePostComponent } from './components/create-post/create-post.component';
 import { PostComponent } from './components/post/post.component';
 import { CommentComponent } from './components/comment/comment.component';
+import { AutofocusDirective } from './directives/autofocus.directive';
 
 const matModules = [
   MatToolbarModule,
@@ -31,7 +32,7 @@ const matModules = [
 ];
 
 @NgModule({
-  declarations: [CreatePostComponent, PostComponent, CommentComponent],
+  declarations: [CreatePostComponent, PostComponent, CommentComponent, AutofocusDirective],
   imports: [
     CommonModule, ReactiveFormsModule, ...matModules
   ],

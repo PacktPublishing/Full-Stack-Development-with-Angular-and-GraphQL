@@ -52,7 +52,7 @@
    </mat-card>
 
    <div class="comment-box" *ngIf="commentsShown">
-    <textarea #commentInput placeholder="Leave a comment.." matInput (keydown.enter)="createComment($event)"></textarea>
+    <textarea #commentInput placeholder="Leave a comment.." matInput (keydown.enter)="createComment($event)" appAutofocus></textarea>
    </div>
    <div *ngIf="commentsShown">
     <ng-content></ng-content>
