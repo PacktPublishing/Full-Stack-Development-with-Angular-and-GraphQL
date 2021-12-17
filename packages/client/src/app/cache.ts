@@ -14,7 +14,8 @@ export default new InMemoryCache({
                 },
                 searchUsers: offsetLimitPagination(),
                 getPostsByUserId: offsetLimitPagination(['userId']),
-                getCommentsByPostId: offsetLimitPagination(['id', 'postId'])
+                getCommentsByPostId: offsetLimitPagination(['id', 'postId']),
+                getFeed: offsetLimitPagination()
             }
         },
         User: {

@@ -9,7 +9,10 @@ import { Apollo } from 'apollo-angular';
 import {
   GetPostsByUserIdDocument,
   GetPostsByUserIdQuery,
-  GetPostsByUserIdQueryVariables
+  GetPostsByUserIdQueryVariables,
+  GetFeedDocument,
+  GetFeedQuery,
+  GetFeedQueryVariables
 } from '@ngsocial/graphql/documents'; 
 import { Post } from '@ngsocial/graphql/types';
 
@@ -40,7 +43,7 @@ export class PostService {
       .mutate({
         text: text,
         image: image
-      }, { refetchQueries: ['getUser']})
+      }, { refetchQueries: ['getUser', 'getFeed']})
       .pipe(map(result => result.data!.post));
   }
   removePost(id: string) {
@@ -68,5 +71,22 @@ export class PostService {
           fetchPolicy: 'cache-and-network',
         });
     return queryRef;
+  }
+  getFeed(
+    offset?: number,
+    limit?: number
+  ){
+    const queryRef = this.apollo
+    .watchQuery<
+      GetFeedQuery,
+      GetFeedQueryVariables>({
+        query: GetFeedDocument,
+        variables: {
+          offset: offset || 0,
+          limit: limit || 10
+        },
+        fetchPolicy: 'cache-and-network',
+      });
+  return queryRef;
   }
 }
