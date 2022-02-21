@@ -1,0 +1,26 @@
+<div class="home-grid">
+    <h1> Hello, {{ authUserName ?? 'member'}} </h1>
+
+
+    <div class="posts-column">
+        <app-create-post [authUser]="authUser" [loading]="loading" (post)="onPost($event)"
+        *ngIf="authUser">
+      </app-create-post>
+      <div *ngFor="let post of posts;">
+        <app-post [post]="post" [authUser]="authUser"
+          (remove)="onRemovePost($event)"
+          (comment)= "onComment($event)"
+          (like)= "onLike($event)"
+          (listComments)= "onListComments($event)"
+          (moreComments)= "onLoadMoreComments($event)">
+          <div 
+           class="comments-section" 
+           *ngFor="let comment of postComments(post.id)">
+             <app-comment [comment]="comment" (removeComment)="onRemoveComment($event)"></app-comment>
+          </div>
+        </app-post>
+      </div>
+      <button *ngIf="authUser && authUser.postsCount! > posts.length" mat-raised-button color="primary"
+        (click)="fetchMore()">More</button> 
+    </div>
+</div>

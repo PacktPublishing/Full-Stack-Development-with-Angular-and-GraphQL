@@ -1,0 +1,11 @@
+<mat-card class="post-box-wrapper">
+ <mat-card-content>
+  <mat-progress-bar style="margin-bottom: 20px;" mode="indeterminate" *ngIf="loading"></mat-progress-bar>
+  <img mat-card-avatar class="auth-user-image" src="{{ authUser?.image }}" />
+  <textarea #postText class="post-box" placeholder="What's on your mind, {{ userFirstName }}?"
+   matInput></textarea>
+  <button mat-button (click)="handlePostClick()" >Post</button>
+  <button mat-button (click)="postImage.click()" >{{ imageFile?.name?? 'Select Image..' }} </button>
+  <input #postImage type="file" style="display:none" (change)="onFileSelected($event)" />
+ </mat-card-content>
+</mat-card>

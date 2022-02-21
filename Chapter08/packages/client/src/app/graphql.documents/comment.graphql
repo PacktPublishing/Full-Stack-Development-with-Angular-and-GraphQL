@@ -1,0 +1,41 @@
+fragment CommentFields on Comment {
+ id
+ comment
+ createdAt
+}
+query getCommentsByPostId(
+ $postId: ID!,  
+ $offset: Int,  
+ $limit: Int) { 
+ getCommentsByPostId( 
+  postId: $postId,  
+  offset: $offset,  
+  limit: $limit) { 
+   ...CommentFields 
+   author { 
+    ...BasicUserFields 
+   } 
+   post { 
+    id 
+   } 
+ } 
+} 
+mutation commentPost(
+ $comment: String!, 
+ $postId: ID!){ 
+ comment(comment:$comment, postId:$postId){ 
+  id post { id commentsCount }
+ } 
+} 
+mutation removeComment($id: ID!){ 
+ removeComment(id:$id){
+  id post { id commentsCount }
+ }
+}
+subscription onPostCommented{
+ onPostCommented {
+  ...CommentFields
+  author { ...BasicUserFields }
+  post { id commentsCount }
+ }
+}

@@ -1,0 +1,12 @@
+.spacer {
+ flex: 1 1 auto;
+}
+button.mat-raised-button {
+ border-radius: 0;
+}
+.searchbar {
+ width: 99%;
+ margin: 5px;
+ height: 30px;
+ border-radius: 23px;
+}

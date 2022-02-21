@@ -1,0 +1,77 @@
+fragment BasicPostFields on Post {
+ id
+ text
+ image
+ createdAt
+}
+
+fragment LikesInfo on Post {
+ likesCount
+ latestLike
+ likedByAuthUser
+}
+
+fragment CommentsInfo on Post {
+ latestComment {
+  ...CommentFields
+  author {
+   id fullName username image
+  }
+ }
+ commentsCount
+}
+
+fragment PostFields on Post {
+ ...BasicPostFields
+ author {
+  ...BasicUserFields
+ }
+ ...CommentsInfo
+ ...LikesInfo
+}
+
+mutation uploadFile($file: Upload!) {
+ uploadFile(file: $file) {
+  url
+  filename
+  mimetype
+  encoding
+ }
+}
+
+mutation createPost($text: String, $image: String) {
+ post(text: $text, image: $image) {
+  ...BasicPostFields
+  author {
+   ...BasicUserFields
+   postsCount
+  }
+ }
+}
+
+mutation removePost($id: ID!) {
+ removePost(id: $id)
+}
+
+query getPostsByUserId(
+ $userId: ID!, 
+ $offset: Int, 
+ $limit: Int) {
+ getPostsByUserId(
+  userId: $userId, 
+  offset: $offset, 
+  limit: $limit) {
+   ...PostFields
+  }
+}
+
+query getFeed(
+ $offset: Int, 
+ $limit: Int) {
+ getFeed(
+  offset: $offset, 
+  limit: $limit) {
+   ...PostFields
+ }
+}
+

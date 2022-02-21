@@ -1,0 +1,17 @@
+{
+  "compilerOptions": { 
+    "target": "es6", 
+    "module": "commonjs", 
+    "rootDir": "./src", 
+    "outDir": "./dist", 
+    "esModuleInterop": true, 
+    "strict": true,
+    "experimentalDecorators": true, 
+    "emitDecoratorMetadata": true, 
+    "strictPropertyInitialization": false,
+    "paths": {
+      "@ngsocial/graphql": ["../graphql-types/src"]
+    }
+  },
+  "references": [{ "path": "../graphql-types" }]
+} 

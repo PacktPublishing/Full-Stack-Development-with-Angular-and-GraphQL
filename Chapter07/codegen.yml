@@ -1,0 +1,29 @@
+schema: './packages/server/src/graphql/schema.graphql'
+documents: './packages/client/src/**/*.graphql'
+generates:
+  ./packages/graphql-types/src/resolvers-types.ts:
+    plugins:
+      - typescript
+      - typescript-resolvers
+
+  ./packages/graphql-types/src/types.ts:
+    plugins:
+      - typescript
+
+  ./packages/graphql-types/src/client/graphql-operations.ts:
+    preset: import-types
+    presetConfig:
+      typesPath: ../types
+    plugins:
+      - typescript-operations
+      - typed-document-node  
+
+  ./packages/client/src/app/core/gql.services.ts:
+    config:
+      documentMode: external
+      importOperationTypesFrom: Operations
+      importDocumentNodeExternallyFrom: '@ngsocial/graphql/documents'
+    plugins:
+      - typescript-apollo-angular
+
+

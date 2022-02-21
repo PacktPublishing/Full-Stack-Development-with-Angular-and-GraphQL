@@ -1,0 +1,18 @@
+<mat-card *ngIf="comment" class="comment-card">
+ <mat-card-header>
+  <img mat-card-avatar class="comment-user-avatar" [src]="comment.author.image" />
+  <mat-card-title>
+   <h4>{{comment.author.fullName}}</h4>
+  </mat-card-title>
+  <mat-card-subtitle class="comment">
+   <p>
+    {{comment.comment}}
+    -
+    {{comment.createdAt}}
+    <button mat-icon-button matTooltip="Remove" (click)="remove()">
+     x
+    </button>
+   </p>
+  </mat-card-subtitle>
+ </mat-card-header>
+</mat-card>

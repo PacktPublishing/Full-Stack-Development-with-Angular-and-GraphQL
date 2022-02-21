@@ -1,0 +1,9 @@
+:host {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+main {
+  flex-grow: 1;
+}

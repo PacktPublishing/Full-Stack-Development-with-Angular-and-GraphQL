@@ -1,0 +1,93 @@
+scalar Upload 
+
+type User {
+  id: ID!
+  fullName: String!
+  bio: String
+  email: String!
+  username: String!
+  password: String!
+  image: String
+  coverImage: String
+  postsCount: Int!
+  createdAt: String!  
+}
+
+type Post {
+  id: ID!
+  text: String
+  image: String
+  author: User!
+  commentsCount: Int!
+  likesCount: Int!
+  likedByAuthUser: Boolean
+  latestComment: Comment
+  latestLike: String
+  createdAt: String!  
+}
+
+type Comment {
+  id: ID!
+  comment: String!
+  author: User!
+  post: Post!
+  createdAt: String!
+}
+
+type Like {
+  id: ID!
+  user: User!
+  post: Post!
+  createdAt: String!
+}
+
+type Notification {
+  id: ID!
+  text: String!
+  postId: ID!
+  createdAt: String!
+}
+
+type AuthPayload { 
+    token: String! 
+    user: User! 
+} 
+
+type File {
+  url: String
+  filename: String
+  mimetype: String
+  encoding: String
+}
+
+type Query {
+  message: String!
+  getUser(userId: ID!): User 
+  getPostsByUserId(userId: ID!, offset: Int, limit: Int): [Post] @auth    
+  getFeed(offset: Int, limit: Int): [Post] @auth
+  getNotificationsByUserId(userId: ID!, offset: Int, limit: Int): [Notification] @auth
+  getCommentsByPostId(postId: ID!, offset: Int, limit: Int): [Comment] @auth
+  getLikesByPostId(postId: ID!, offset: Int, limit: Int): [Like] @auth
+  searchUsers(searchQuery: String, offset: Int, limit: Int): [User] @auth
+} 
+
+type Mutation {
+  post(text: String, image: String): Post @auth
+  removePost(id: ID!): ID @auth 
+  comment(comment: String!, postId: ID!): Comment @auth
+  removeComment(id: ID!): Comment @auth
+  like(postId: ID!): Like @auth
+  removeLike(postId: ID!): Like @auth
+  removeNotification(id: ID!): ID @auth
+  register(fullName: String!, username: String!, email: String!, password: String!): AuthPayload!
+  signIn(email: String!, password: String!): AuthPayload!
+  uploadFile(file: Upload!): File @auth
+  setUserPhoto(file: Upload!): User @auth
+  setUserCover(file: Upload!): User @auth
+  setUserBio(bio: String!): User @auth
+}
+
+type Subscription { 
+  onPostCommented: Comment
+  onPostLiked: Like
+}

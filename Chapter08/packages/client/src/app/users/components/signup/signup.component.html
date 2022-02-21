@@ -1,0 +1,41 @@
+<mat-card>
+  <mat-card-title>Create a new account</mat-card-title>
+  <mat-card-subtitle>It's quick and easy.</mat-card-subtitle>
+  <mat-card-content>
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <mat-form-field>
+        <mat-icon matPrefix>person</mat-icon>
+        <input autofocus type="text" matInput placeholder="Name *" formControlName="fullName">
+        <mat-hint align="start">
+          Enter your full name
+        </mat-hint>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-icon matPrefix>mail</mat-icon>
+        <input type="email" matInput placeholder="Email *" formControlName="email">
+      </mat-form-field>
+      <mat-form-field>
+        <mat-icon matPrefix>account_circle</mat-icon>
+        <input type="text" matInput placeholder="Username *" formControlName="username">
+      </mat-form-field>
+      <mat-form-field>
+        <mat-icon matPrefix>lock</mat-icon>
+        <input type="password" matInput placeholder="Password *" formControlName="password">
+        <mat-hint align="start">
+          Password should be at least six characters
+        </mat-hint>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-icon matPrefix>lock</mat-icon>
+        <input type="password" matInput placeholder="Confirm password *" formControlName="password2">
+        <mat-hint align="start">
+          Password should be at least six characters
+        </mat-hint>
+      </mat-form-field>
+      <p *ngIf="errorMessage" class="error-message">
+        {{ errorMessage }}
+      </p>
+      <button type="submit" mat-raised-button color="primary">Sign Up</button>
+    </form>
+  </mat-card-content>
+</mat-card>

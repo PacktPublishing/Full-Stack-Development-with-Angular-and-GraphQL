@@ -1,0 +1,33 @@
+fragment BasicUserFields on User {
+ id
+ fullName
+ username
+ image
+}
+
+fragment UserFields on User {
+ ...BasicUserFields
+ email
+ bio
+ coverImage
+ postsCount
+ createdAt
+}
+
+mutation setUserPhoto($file: Upload!) {
+ setUserPhoto(file: $file) {
+  ...UserFields
+ }
+}
+
+mutation setUserCover($file: Upload!) {
+ setUserCover(file: $file) {
+  ...UserFields
+ }
+}
+
+mutation setUserBio($bio: String!) {
+ setUserBio(bio: $bio) {
+  ...UserFields
+ }
+}

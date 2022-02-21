@@ -1,0 +1,67 @@
+<mat-card class="post-wrapper" *ngIf="post">
+ <mat-card-header>
+  <img mat-card-avatar class="post-user-avatar" [src]="post.author?.image" />
+  <mat-card-title>
+   {{ post.author?.fullName }}
+  </mat-card-title>
+  <mat-card-subtitle>
+   {{ post.createdAt }}
+  </mat-card-subtitle>
+ </mat-card-header>
+ <mat-card-content>
+  <p>
+   {{ post.text }}
+  </p>
+  <img class="post-card-image" mat-card-image *ngIf="post.image" [src]="post.image" [alt]="post.text">
+ </mat-card-content>
+ <mat-card-actions>
+  <div class="engagements-count">
+   <button [disabled]="post.likesCount === 0" mat-button (click)="displayLikes()">
+    {{ latestLike }}
+   </button>
+   <button [disabled]="post.commentsCount === 0" mat-button (click)="displayComments()">
+    {{ post.commentsCount }} Comments
+   </button>
+  </div>
+  <div class="engagement-actions">
+   <button [style.color]="post?.likedByAuthUser ? 'red' : 'black'" mat-button (click)="sendLike()">
+    <mat-icon>favorite</mat-icon>
+    <span>
+     Like
+    </span>
+   </button>
+
+   <button mat-button (click)="displayComments()">
+    <mat-icon>comment</mat-icon>
+    <span>Comment</span>
+   </button>
+   <button *ngIf="authUser?.id == post.author?.id" mat-button (click)="removePost()">
+    <mat-icon aria-hidden="false" aria-label="Remove">clear</mat-icon>
+    <span>
+     Remove
+    </span>
+   </button>
+  </div>
+  <div class="comment-area">
+   <mat-card *ngIf="!commentsShown && post.latestComment" class="comment-card">
+    <mat-card-content class="card-comment-content">
+     <h4>{{post.latestComment?.author?.fullName}}</h4>
+     {{ post.latestComment?.comment }}
+    </mat-card-content>
+    {{ post.latestComment?.createdAt }}
+   </mat-card>
+
+   <div class="comment-box" *ngIf="commentsShown">
+    <textarea #commentInput placeholder="Leave a comment.." matInput (keydown.enter)="createComment($event)" appAutofocus></textarea>
+   </div>
+   <div *ngIf="commentsShown">
+    <ng-content></ng-content>
+   </div>
+
+   <button mat-button class="load-comments-btn" (click)="loadComments()"
+    *ngIf="commentsShown && post.commentsCount > commentsPerPost">
+    Load more comments
+   </button>
+  </div>
+ </mat-card-actions>
+</mat-card>

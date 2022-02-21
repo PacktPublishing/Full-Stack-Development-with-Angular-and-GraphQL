@@ -1,0 +1,32 @@
+* {
+    box-sizing: border-box;
+  }
+  mat-card {
+    margin: 0.4rem;
+  }
+  .post-wrapper {
+    width: 100%;
+  }
+  .post-card-image {
+    margin:0px; 
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+  }
+  .post-user-avatar {
+    background-color: gray;
+    border-width: 1px;
+  }
+  .engagements-count {
+    display: flex;   flex-direction: row;   width: 100%; justify-content: space-between;
+  }
+  .comment-box > textarea {
+      width: 100%;
+      padding: 10px;
+      background-color: #f0f2f5;
+      border-radius: 9px;
+  }
+  
+  
+  

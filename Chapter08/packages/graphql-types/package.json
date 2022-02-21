@@ -1,0 +1,26 @@
+{
+  "name": "@ngsocial/graphql",
+  "version": "0.0.1",
+  "description": "Generated GraphQL types",
+  "author": "Ahmed B <techiediaries9@gmail.com>",
+  "homepage": "https://github.com/PacktPublishing/Full-Stack-App-Development-with-Angular-and-GraphQL#readme",
+  "license": "MIT",
+  "main": "lib/graphql-types.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PacktPublishing/Full-Stack-App-Development-with-Angular-and-GraphQL.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "bugs": {
+    "url": "https://github.com/PacktPublishing/Full-Stack-App-Development-with-Angular-and-GraphQL/issues"
+  }
+}

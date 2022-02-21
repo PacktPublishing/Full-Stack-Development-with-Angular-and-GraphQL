@@ -1,0 +1,19 @@
+* {
+    box-sizing: border-box;
+  }
+  mat-card {
+    margin: 0.4rem;
+}
+
+.home-grid {
+    margin-top: 15px;
+    display: grid;
+    grid-template-columns: 1fr 2.5fr 1.5fr;
+}
+
+@media (max-width: 600px) {
+    .home-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+}
