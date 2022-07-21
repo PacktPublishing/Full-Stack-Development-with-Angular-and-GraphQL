@@ -134,7 +134,7 @@ describe('AuthService', () => {
     op.flush({ data: fakeLoginResponse });
 
   });
-  xit('should reset auth state when login fails on server', (done) => {
+  it('should reset auth state when login fails on server', (done) => {
     const resetAuthStateSpy = spyOn(service, 'resetAuthState' as never);
 
     service.login('a.b@techiediaries.com', '1..9').subscribe({
